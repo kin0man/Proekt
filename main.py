@@ -72,12 +72,17 @@ class Player(pygame.sprite.Sprite):
             elif event.key == pygame.K_UP and level[self.pos_y - 1][self.pos_x] != '#':
                 if level[self.pos_y - 1][self.pos_x] == '?':
                     if level[self.pos_y - 2][self.pos_x] != '#':
-                        box.move(self.pos_x + 2, self.pos_y, 'right')
+                        box.move(self.pos_x, self.pos_y - 2, 'up')
                         self.pos_y -= 1
                 else:
                     self.pos_y -= 1
             elif event.key == pygame.K_DOWN and level[self.pos_y + 1][self.pos_x] != '#':
-                self.pos_y += 1
+                if level[self.pos_y + 1][self.pos_x] == '?':
+                    if level[self.pos_y + 2][self.pos_x] != '#':
+                        box.move(self.pos_x, self.pos_y + 2, 'down')
+                        self.pos_y += 1
+                else:
+                    self.pos_y += 1
         self.image = player_image
         self.rect = self.image.get_rect().move(
             tile_width * self.pos_x + 15, tile_height * self.pos_y + 5)
@@ -104,14 +109,18 @@ class Box(pygame.sprite.Sprite):
             level[pos_y] = ''.join(string)
         elif direction == 'up':
             string = list(level[pos_y])
-            string[pos_x + 1] = '.'
             string[pos_x] = '?'
+            string2 = list(level[pos_y + 1])
+            string2[pos_x]= '.'
             level[pos_y] = ''.join(string)
+            level[pos_y + 1] = ''.join(string2)
         elif direction == 'down':
             string = list(level[pos_y])
-            string[pos_x + 1] = '.'
             string[pos_x] = '?'
+            string2 = list(level[pos_y - 1])
+            string2[pos_x]= '.'
             level[pos_y] = ''.join(string)
+            level[pos_y - 1] = ''.join(string2)
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.image = box_image
