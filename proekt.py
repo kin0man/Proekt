@@ -8,6 +8,7 @@ player = None
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
+box_group = pygame.sprite.Group()
 
 
 def load_image(name, colorkey=None):
@@ -23,6 +24,7 @@ tile_images = {
     'empty': load_image('grass.png')
 }
 player_image = load_image('mario.png')
+box_image = load_image('move_box.png')
 tile_width = tile_height = 50
 
 
@@ -53,21 +55,66 @@ class Player(pygame.sprite.Sprite):
 
     def move(self, event):
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT and load_level('map.txt')[self.pos_y][self.pos_x - 1] != '#':
+            if event.key == pygame.K_LEFT and level[self.pos_y][self.pos_x - 1] != '#' or\
+                    level[self.pos_y][self.pos_x - 1] == '?' and level[self.pos_y][self.pos_x - 2] != '#':
+                if level[self.pos_y][self.pos_x - 2] != '#' and \
+                        level[self.pos_y][self.pos_x - 1] == '?':
+                    box.move(self.pos_x - 2, self.pos_y, 'left')
                 self.pos_x -= 1
-            elif event.key == pygame.K_RIGHT and load_level('map.txt')[self.pos_y][self.pos_x + 1] != '#':
+            elif event.key == pygame.K_RIGHT and level[self.pos_y][self.pos_x + 1] != '#' or\
+                    level[self.pos_y][self.pos_x + 1] == '?' and level[self.pos_y][self.pos_x + 2] != '#':
+                if level[self.pos_y][self.pos_x + 2] != '#' and \
+                        level[self.pos_y][self.pos_x + 1] == '?':
+                    box.move(self.pos_x + 2, self.pos_y, 'right')
                 self.pos_x += 1
-            elif event.key == pygame.K_UP and load_level('map.txt')[self.pos_y - 1][self.pos_x] != '#':
+            elif event.key == pygame.K_UP and level[self.pos_y - 1][self.pos_x] != '#':
                 self.pos_y -= 1
-            elif event.key == pygame.K_DOWN and load_level('map.txt')[self.pos_y + 1][self.pos_x] != '#':
+            elif event.key == pygame.K_DOWN and level[self.pos_y + 1][self.pos_x] != '#':
                 self.pos_y += 1
         self.image = player_image
         self.rect = self.image.get_rect().move(
             tile_width * self.pos_x + 15, tile_height * self.pos_y + 5)
 
 
+class Box(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(box_group, all_sprites)
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+        self.image = box_image
+        self.rect = self.image.get_rect().move(
+            tile_width * self.pos_x, tile_height * self.pos_y)
+
+    def move(self, pos_x, pos_y, direction):
+        string = list(level[pos_y])
+        if direction == 'left':
+            string[pos_x + 1] = '.'
+            string[pos_x] = '?'
+            level[pos_y] = ''.join(string)
+        elif direction == 'right':
+            string[pos_x - 1] = '.'
+            string[pos_x] = '?'
+            level[pos_y] = ''.join(string)
+            print(level)
+        elif direction == 'up':
+            string = list(level[pos_y])
+            string[pos_x + 1] = '.'
+            string[pos_x] = '?'
+            level[pos_y] = ''.join(string)
+        elif direction == 'down':
+            string = list(level[pos_y])
+            string[pos_x + 1] = '.'
+            string[pos_x] = '?'
+            level[pos_y] = ''.join(string)
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+        self.image = box_image
+        self.rect = self.image.get_rect().move(
+            tile_width * self.pos_x, tile_height * self.pos_y)
+
+
 def generate_level(level):
-    new_player, x, y = None, None, None
+    new_box, new_player, x, y = None, None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
@@ -77,7 +124,10 @@ def generate_level(level):
             elif level[y][x] == '@':
                 Tile('empty', x, y)
                 new_player = Player(x, y)
-    return new_player, x, y
+            elif level[y][x] == '?':
+                Tile('empty', x, y)
+                new_box = Box(x, y)
+    return new_box, new_player, x, y, level
 
 
 def terminate():
@@ -88,7 +138,7 @@ def terminate():
 def start_screen():
     flag = False
     screen.fill((0, 0, 0))
-    fon = pygame.transform.scale(load_image('fon.jpg'), (600, 600))
+    fon = load_image('fon.jpg')
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 100)
     text = font.render("Начать", True, (100, 255, 100))
@@ -148,6 +198,7 @@ def start_screen():
             elif pressed[0] and rect.collidepoint(event.pos):
                 all_sprites.draw(screen)
                 player_group.draw(screen)
+                box_group.draw(screen)
                 flag = True
         pygame.display.flip()
         clock.tick(FPS)
@@ -155,7 +206,7 @@ def start_screen():
 pygame.init()
 size = width, height = 600, 600
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption('Игра')
+pygame.display.set_caption('Сокобан')
 clock = pygame.time.Clock()
-player, level_x, level_y = generate_level(load_level('map.txt'))
+box, player, level_x, level_y, level = generate_level(load_level('map.txt'))
 start_screen()
