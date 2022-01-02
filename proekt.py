@@ -10,7 +10,6 @@ tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 box_group = pygame.sprite.Group()
 
-
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
@@ -55,13 +54,14 @@ class Player(pygame.sprite.Sprite):
 
     def move(self, event):
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT and (level[self.pos_y][self.pos_x - 1] != '#' and\
-                    level[self.pos_y][self.pos_x - 1] != '?' and level[self.pos_y][self.pos_x - 2] != '#'):
+            if event.key == pygame.K_LEFT and level[self.pos_y][self.pos_x - 1] != '#' and \
+                    (level[self.pos_y][self.pos_x - 2] != '#' or level[self.pos_y][self.pos_x - 1] != '?'):
                 if level[self.pos_y][self.pos_x - 2] != '#' and \
                         level[self.pos_y][self.pos_x - 1] == '?':
                     box.move(self.pos_x - 2, self.pos_y, 'left')
                 self.pos_x -= 1
-            elif event.key == pygame.K_RIGHT and level[self.pos_y][self.pos_x + 1] != '#':
+            elif event.key == pygame.K_RIGHT and level[self.pos_y][self.pos_x + 1] != '#' and \
+                    (level[self.pos_y][self.pos_x + 2] != '#' or level[self.pos_y][self.pos_x + 1] != '?'):
                 if level[self.pos_y][self.pos_x + 2] != '#' and \
                         level[self.pos_y][self.pos_x + 1] == '?':
                     box.move(self.pos_x + 2, self.pos_y, 'right')
@@ -185,7 +185,6 @@ def start_screen():
     pygame.draw.rect(screen, 'green', rect4, 1)
     pygame.draw.rect(screen, 'green', rect5, 1)
 
-    pygame.mixer.music.load('fon_music.mp3')
     pygame.mixer.music.play(-1)
     pygame.mixer.music.set_volume(0.25)
     while True:
@@ -194,6 +193,7 @@ def start_screen():
             if event.type == pygame.QUIT or pressed[0] and rect5.collidepoint(event.pos):
                 terminate()
             elif event.type == pygame.KEYDOWN and flag:
+                steps.play()
                 player.move(event)
                 all_sprites.draw(screen)
                 box_group.draw(screen)
@@ -207,6 +207,12 @@ def start_screen():
         clock.tick(FPS)
 
 pygame.init()
+fullname = os.path.join('data', 'fon_music.mp3')
+pygame.mixer.music.load(fullname)
+
+fullname = os.path.join('data', 'steps.mp3')
+steps = pygame.mixer.Sound(fullname)
+
 size = width, height = 600, 600
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Сокобан')
