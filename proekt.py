@@ -55,14 +55,13 @@ class Player(pygame.sprite.Sprite):
 
     def move(self, event):
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT and level[self.pos_y][self.pos_x - 1] != '#' or\
-                    level[self.pos_y][self.pos_x - 1] == '?' and level[self.pos_y][self.pos_x - 2] != '#':
+            if event.key == pygame.K_LEFT and (level[self.pos_y][self.pos_x - 1] != '#' and\
+                    level[self.pos_y][self.pos_x - 1] != '?' and level[self.pos_y][self.pos_x - 2] != '#'):
                 if level[self.pos_y][self.pos_x - 2] != '#' and \
                         level[self.pos_y][self.pos_x - 1] == '?':
                     box.move(self.pos_x - 2, self.pos_y, 'left')
                 self.pos_x -= 1
-            elif event.key == pygame.K_RIGHT and level[self.pos_y][self.pos_x + 1] != '#' or\
-                    level[self.pos_y][self.pos_x + 1] == '?' and level[self.pos_y][self.pos_x + 2] != '#':
+            elif event.key == pygame.K_RIGHT and level[self.pos_y][self.pos_x + 1] != '#':
                 if level[self.pos_y][self.pos_x + 2] != '#' and \
                         level[self.pos_y][self.pos_x + 1] == '?':
                     box.move(self.pos_x + 2, self.pos_y, 'right')
@@ -95,7 +94,6 @@ class Box(pygame.sprite.Sprite):
             string[pos_x - 1] = '.'
             string[pos_x] = '?'
             level[pos_y] = ''.join(string)
-            print(level)
         elif direction == 'up':
             string = list(level[pos_y])
             string[pos_x + 1] = '.'
@@ -186,6 +184,10 @@ def start_screen():
     pygame.draw.rect(screen, 'green', rect3, 1)
     pygame.draw.rect(screen, 'green', rect4, 1)
     pygame.draw.rect(screen, 'green', rect5, 1)
+
+    pygame.mixer.music.load('fon_music.mp3')
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0.25)
     while True:
         for event in pygame.event.get():
             pressed = pygame.mouse.get_pressed()
@@ -194,6 +196,7 @@ def start_screen():
             elif event.type == pygame.KEYDOWN and flag:
                 player.move(event)
                 all_sprites.draw(screen)
+                box_group.draw(screen)
                 player_group.draw(screen)
             elif pressed[0] and rect.collidepoint(event.pos):
                 all_sprites.draw(screen)
