@@ -24,6 +24,7 @@ tile_images = {
 }
 player_image = load_image('mario.png')
 box_image = load_image('move_box.png')
+destination_image = load_image('destination.png')
 tile_width = tile_height = 50
 
 
@@ -85,6 +86,9 @@ class Player(pygame.sprite.Sprite):
         self.image = player_image
         self.rect = self.image.get_rect().move(
             tile_width * self.pos_x + 15, tile_height * self.pos_y + 5)
+        if box.pos_x == destination.pos_x and box.pos_y == destination.pos_y:
+            start_screen()
+            generate_level(load_level('map.txt'))
 
 
 class Box(pygame.sprite.Sprite):
@@ -127,6 +131,16 @@ class Box(pygame.sprite.Sprite):
             tile_width * self.pos_x, tile_height * self.pos_y)
 
 
+class Destination(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(all_sprites)
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+        self.image = destination_image
+        self.rect = self.image.get_rect().move(
+            tile_width * self.pos_x, tile_height * self.pos_y)
+
+
 def generate_level(level):
     new_box, new_player, x, y = None, None, None, None
     for y in range(len(level)):
@@ -141,7 +155,10 @@ def generate_level(level):
             elif level[y][x] == '?':
                 Tile('empty', x, y)
                 new_box = Box(x, y)
-    return new_box, new_player, x, y, level
+            elif level[y][x] == 'x':
+                Tile('empty', x, y)
+                new_destination = Destination(x, y)
+    return new_destination, new_box, new_player, x, y, level
 
 
 def terminate():
@@ -150,6 +167,7 @@ def terminate():
 
 
 def start_screen():
+    global destination, box, player, level_x, level_y, level
     flag = False
     screen.fill((0, 0, 0))
     fon = load_image('fon.jpg')
@@ -215,6 +233,7 @@ def start_screen():
                 box_group.draw(screen)
                 player_group.draw(screen)
             elif pressed[0] and rect.collidepoint(event.pos):
+                destination, box, player, level_x, level_y, level = generate_level(load_level('map.txt'))
                 all_sprites.draw(screen)
                 player_group.draw(screen)
                 box_group.draw(screen)
@@ -233,5 +252,4 @@ size = width, height = 600, 600
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Сокобан')
 clock = pygame.time.Clock()
-box, player, level_x, level_y, level = generate_level(load_level('map.txt'))
 start_screen()
