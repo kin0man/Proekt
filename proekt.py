@@ -233,6 +233,7 @@ def start_screen():
 
     pygame.mixer.music.play(-1)
     pygame.mixer.music.set_volume(0.25)
+    flag2 = False
     while True:
         for event in pygame.event.get():
             pressed = pygame.mouse.get_pressed()
@@ -259,23 +260,24 @@ def start_screen():
                 player_group.draw(screen)
                 box_group.draw(screen)
                 flag = True
-            elif pressed[0] and rect_h.collidepoint(event.pos):
-                all_sprites = pygame.sprite.Group()
-                tiles_group = pygame.sprite.Group()
-                player_group = pygame.sprite.Group()
-                box_group = pygame.sprite.Group()
-                start_screen()
-                destination, box, player, level_x, level_y, level = generate_level(load_level('map.txt'))
-                start_screen()
-            elif pressed[0] and rect_r.collidepoint(event.pos):
-                all_sprites = pygame.sprite.Group()
-                tiles_group = pygame.sprite.Group()
-                player_group = pygame.sprite.Group()
-                box_group = pygame.sprite.Group()
-                destination, box, player, level_x, level_y, level = generate_level(load_level('map.txt'))
-                all_sprites.draw(screen)
-                box_group.draw(screen)
-                player_group.draw(screen)
+                flag2 = True
+            if flag2:
+                if pressed[0] and rect_h.collidepoint(event.pos):
+                    all_sprites = pygame.sprite.Group()
+                    tiles_group = pygame.sprite.Group()
+                    player_group = pygame.sprite.Group()
+                    box_group = pygame.sprite.Group()
+                    destination, box, player, level_x, level_y, level = generate_level(load_level('map.txt'))
+                    start_screen()
+                elif pressed[0] and rect_r.collidepoint(event.pos):
+                    all_sprites = pygame.sprite.Group()
+                    tiles_group = pygame.sprite.Group()
+                    player_group = pygame.sprite.Group()
+                    box_group = pygame.sprite.Group()
+                    destination, box, player, level_x, level_y, level = generate_level(load_level('map.txt'))
+                    all_sprites.draw(screen)
+                    box_group.draw(screen)
+                    player_group.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
 
