@@ -173,6 +173,7 @@ def terminate():
 def start_screen():
     global all_sprites, tiles_group, player_group, box_group, destination, box, player, level_x, level_y, level
     flag_game = False
+    flag_levels = False
     flag_rules = False
     fon = load_image('fon.jpg')
     screen.blit(fon, (0, 0))
@@ -236,7 +237,7 @@ def start_screen():
         for event in pygame.event.get():
             pressed = pygame.mouse.get_pressed()
             if event.type == pygame.QUIT or pressed[0] and rect5.collidepoint(event.pos)\
-                    and not flag_game and not flag_rules:
+                    and not flag_game and not flag_rules and not flag_levels:
                 terminate()
             elif event.type == pygame.KEYDOWN and flag_game:
                 steps.play()
@@ -246,25 +247,20 @@ def start_screen():
                 player_group.draw(screen)
             elif pressed[0] and rect.collidepoint(event.pos) and not flag_game and not flag_rules:
                 screen.blit(fon, (0, 0))
-                screen.blit(load_image('level_1.png'), (100, 263))
-                screen.blit(load_image('level_2.png'), (100, 263))
-                screen.blit(load_image('level_3.png'), (100, 263))
-
-                screen.fill('white')
-                destination, box, player, level_x, level_y, level = generate_level(load_level('map.txt'))
-                home = load_image('home.png')
-                rect_h = pygame.Rect(0, 600, 50, 50)
-                screen.blit(home, (0, 600))
-                ret = load_image('ret.png')
-                rect_r = pygame.Rect(550, 600, 50, 50)
-                screen.blit(ret, (550, 600))
-                pygame.draw.rect(screen, 'black', rect_h, 1)
-                pygame.draw.rect(screen, 'black', rect_r, 1)
-
-                all_sprites.draw(screen)
-                player_group.draw(screen)
-                box_group.draw(screen)
-                flag_game = True
+                screen.blit(load_image('levels.png'), (0, 0))
+                screen.blit(load_image('level_1.png'), (60, 263))
+                screen.blit(load_image('level_2.png'), (230, 263))
+                screen.blit(load_image('level_3.png'), (400, 263))
+                screen.blit(load_image('home_2.png'), (238, 530))
+                rect_h1 = pygame.Rect(238, 530, 120, 120)
+                pygame.draw.rect(screen, 'brown', rect_h1, 1)
+                rect_level1 = pygame.Rect(60, 263, 140, 140)
+                pygame.draw.rect(screen, 'brown', rect_level1, 1)
+                rect_level2 = pygame.Rect(230, 263, 140, 140)
+                pygame.draw.rect(screen, 'brown', rect_level2, 1)
+                rect_level3 = pygame.Rect(400, 263, 140, 140)
+                pygame.draw.rect(screen, 'brown', rect_level3, 1)
+                flag_levels = True
             elif pressed[0] and rect4.collidepoint(event.pos) and not flag_game:
                 screen.blit(fon, (0, 0))
                 screen.blit(load_image('rules_1.png'), (0, 0))
@@ -291,13 +287,30 @@ def start_screen():
                     all_sprites.draw(screen)
                     box_group.draw(screen)
                     player_group.draw(screen)
-            if flag_rules:
+            if flag_rules or flag_levels:
                 if pressed[0] and rect_h1.collidepoint(event.pos):
                     all_sprites = pygame.sprite.Group()
                     tiles_group = pygame.sprite.Group()
                     player_group = pygame.sprite.Group()
                     box_group = pygame.sprite.Group()
                     start_screen()
+            if flag_levels:
+                if pressed[0] and rect_level1.collidepoint(event.pos):
+                    screen.blit(fon, (0, 0))
+                    destination, box, player, level_x, level_y, level = generate_level(load_level('map.txt'))
+                    all_sprites.draw(screen)
+                    player_group.draw(screen)
+                    box_group.draw(screen)
+                    home = load_image('home.png')
+                    rect_h = pygame.Rect(0, 600, 50, 50)
+                    screen.blit(home, (0, 600))
+                    ret = load_image('ret.png')
+                    rect_r = pygame.Rect(550, 600, 50, 50)
+                    screen.blit(ret, (550, 600))
+                    pygame.draw.rect(screen, 'black', rect_h, 1)
+                    pygame.draw.rect(screen, 'black', rect_r, 1)
+                    flag_game = True
+                    flag_levels = False
         pygame.display.flip()
         clock.tick(FPS)
 
