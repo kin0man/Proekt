@@ -172,8 +172,8 @@ def terminate():
 
 def start_screen():
     global all_sprites, tiles_group, player_group, box_group, destination, box, player, level_x, level_y, level
-    flag = False
-    screen.fill((0, 0, 0))
+    flag_game = False
+    flag_rules = False
     fon = load_image('fon.jpg')
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 100)
@@ -232,20 +232,26 @@ def start_screen():
 
     pygame.mixer.music.play(-1)
     pygame.mixer.music.set_volume(0.25)
-    flag2 = False
     while True:
         for event in pygame.event.get():
             pressed = pygame.mouse.get_pressed()
-            if event.type == pygame.QUIT or pressed[0] and rect5.collidepoint(event.pos) and not flag2:
+            if event.type == pygame.QUIT or pressed[0] and rect5.collidepoint(event.pos)\
+                    and not flag_game and not flag_rules:
                 terminate()
-            elif event.type == pygame.KEYDOWN and flag:
+            elif event.type == pygame.KEYDOWN and flag_game:
                 steps.play()
                 player.move(event)
                 all_sprites.draw(screen)
                 box_group.draw(screen)
                 player_group.draw(screen)
-            elif pressed[0] and rect.collidepoint(event.pos) and not flag2:
+            elif pressed[0] and rect.collidepoint(event.pos) and not flag_game and not flag_rules:
+                screen.blit(fon, (0, 0))
+                screen.blit(load_image('level_1.png'), (100, 263))
+                screen.blit(load_image('level_2.png'), (100, 263))
+                screen.blit(load_image('level_3.png'), (100, 263))
+
                 screen.fill('white')
+                destination, box, player, level_x, level_y, level = generate_level(load_level('map.txt'))
                 home = load_image('home.png')
                 rect_h = pygame.Rect(0, 600, 50, 50)
                 screen.blit(home, (0, 600))
@@ -254,13 +260,22 @@ def start_screen():
                 screen.blit(ret, (550, 600))
                 pygame.draw.rect(screen, 'black', rect_h, 1)
                 pygame.draw.rect(screen, 'black', rect_r, 1)
-                destination, box, player, level_x, level_y, level = generate_level(load_level('map.txt'))
+
                 all_sprites.draw(screen)
                 player_group.draw(screen)
                 box_group.draw(screen)
-                flag = True
-                flag2 = True
-            if flag2:
+                flag_game = True
+            elif pressed[0] and rect4.collidepoint(event.pos) and not flag_game:
+                screen.blit(fon, (0, 0))
+                screen.blit(load_image('rules_1.png'), (0, 0))
+                screen.blit(load_image('rules.png'), (0, 50))
+                screen.blit(load_image('rules_2.png'), (0, 225))
+                screen.blit(load_image('rules_3.png'), (0, 325))
+                screen.blit(load_image('home_2.png'), (238, 530))
+                rect_h1 = pygame.Rect(238, 530, 120, 120)
+                pygame.draw.rect(screen, 'brown', rect_h1, 1)
+                flag_rules = True
+            if flag_game:
                 if pressed[0] and rect_h.collidepoint(event.pos):
                     all_sprites = pygame.sprite.Group()
                     tiles_group = pygame.sprite.Group()
@@ -276,6 +291,13 @@ def start_screen():
                     all_sprites.draw(screen)
                     box_group.draw(screen)
                     player_group.draw(screen)
+            if flag_rules:
+                if pressed[0] and rect_h1.collidepoint(event.pos):
+                    all_sprites = pygame.sprite.Group()
+                    tiles_group = pygame.sprite.Group()
+                    player_group = pygame.sprite.Group()
+                    box_group = pygame.sprite.Group()
+                    start_screen()
         pygame.display.flip()
         clock.tick(FPS)
 
