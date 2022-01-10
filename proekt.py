@@ -2,13 +2,13 @@ import sys
 import pygame
 import os
 
-
 FPS = 50
 player = None
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 box_group = pygame.sprite.Group()
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -17,6 +17,7 @@ def load_image(name, colorkey=None):
         sys.exit()
     image = pygame.image.load(fullname)
     return image
+
 
 tile_images = {
     'wall': load_image('box.png'),
@@ -60,7 +61,8 @@ class Player(pygame.sprite.Sprite):
     def move(self, event):
         global all_sprites, tiles_group, player_group, box_group, player, level_x, level_y, level, boxes, boxes_coords
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT and level[self.pos_y][self.pos_x - 1] != '#':
+            if event.key == pygame.K_LEFT and level[self.pos_y][self.pos_x - 1] != '#' and not \
+                    (level[self.pos_y][self.pos_x - 1] == '?' and level[self.pos_y][self.pos_x - 2] == '?'):
                 if level[self.pos_y][self.pos_x - 1] == '?':
                     if level[self.pos_y][self.pos_x - 2] != '#':
                         boxes[boxes_coords.index((self.pos_x - 1, self.pos_y))].move(self.pos_x - 2, self.pos_y, 'left')
@@ -68,15 +70,18 @@ class Player(pygame.sprite.Sprite):
                         self.pos_x -= 1
                 else:
                     self.pos_x -= 1
-            elif event.key == pygame.K_RIGHT and level[self.pos_y][self.pos_x + 1] != '#':
+            elif event.key == pygame.K_RIGHT and level[self.pos_y][self.pos_x + 1] != '#' and not \
+                    (level[self.pos_y][self.pos_x + 1] == '?' and level[self.pos_y][self.pos_x + 2] == '?'):
                 if level[self.pos_y][self.pos_x + 1] == '?':
                     if level[self.pos_y][self.pos_x + 2] != '#':
-                        boxes[boxes_coords.index((self.pos_x + 1, self.pos_y))].move(self.pos_x + 2, self.pos_y, 'right')
+                        boxes[boxes_coords.index((self.pos_x + 1, self.pos_y))].move(self.pos_x + 2, self.pos_y,
+                                                                                     'right')
                         boxes_coords[boxes_coords.index((self.pos_x + 1, self.pos_y))] = (self.pos_x + 2, self.pos_y)
                         self.pos_x += 1
                 else:
                     self.pos_x += 1
-            elif event.key == pygame.K_UP and level[self.pos_y - 1][self.pos_x] != '#':
+            elif event.key == pygame.K_UP and level[self.pos_y - 1][self.pos_x] != '#' and not \
+                    (level[self.pos_y - 1][self.pos_x] == '?' and level[self.pos_y - 2][self.pos_x] == '?'):
                 if level[self.pos_y - 1][self.pos_x] == '?':
                     if level[self.pos_y - 2][self.pos_x] != '#':
                         boxes[boxes_coords.index((self.pos_x, self.pos_y - 1))].move(self.pos_x, self.pos_y - 2, 'up')
@@ -84,7 +89,8 @@ class Player(pygame.sprite.Sprite):
                         self.pos_y -= 1
                 else:
                     self.pos_y -= 1
-            elif event.key == pygame.K_DOWN and level[self.pos_y + 1][self.pos_x] != '#':
+            elif event.key == pygame.K_DOWN and level[self.pos_y + 1][self.pos_x] != '#' and not \
+                    (level[self.pos_y + 1][self.pos_x] == '?' and level[self.pos_y + 2][self.pos_x] == '?'):
                 if level[self.pos_y + 1][self.pos_x] == '?':
                     if level[self.pos_y + 2][self.pos_x] != '#':
                         boxes[boxes_coords.index((self.pos_x, self.pos_y + 1))].move(self.pos_x, self.pos_y + 2, 'down')
@@ -95,7 +101,7 @@ class Player(pygame.sprite.Sprite):
         self.image = player_image
         self.rect = self.image.get_rect().move(
             tile_width * self.pos_x + 15, tile_height * self.pos_y + 5)
-        if boxes_coords == destinations or sorted(boxes_coords, reverse=True) == destinations:
+        if sorted(boxes_coords) == sorted(destinations):
             all_sprites = pygame.sprite.Group()
             tiles_group = pygame.sprite.Group()
             player_group = pygame.sprite.Group()
@@ -181,7 +187,7 @@ def terminate():
 
 
 def start_screen():
-    global all_sprites, tiles_group, player_group, box_group, player,\
+    global all_sprites, tiles_group, player_group, box_group, player, \
         level_x, level_y, level, boxes, boxes_coords, destinations
     flag_game = False
     flag_levels = False
@@ -262,14 +268,24 @@ def start_screen():
                 if pressed[0] and rect_level1.collidepoint(event.pos):
                     player, level_x, level_y, level = generate_level(load_level('map1.txt'))
                     flag_name_map = 1
-                if pressed[0] and rect_level2.collidepoint(event.pos) and not flag_main_menu:
+                elif pressed[0] and rect_level2.collidepoint(event.pos) and not flag_main_menu:
                     player, level_x, level_y, level = generate_level(load_level('map2.txt'))
                     flag_name_map = 2
-                if pressed[0] and rect_level3.collidepoint(event.pos) and not flag_main_menu:
+                elif pressed[0] and rect_level3.collidepoint(event.pos) and not flag_main_menu:
                     player, level_x, level_y, level = generate_level(load_level('map3.txt'))
                     flag_name_map = 3
-                if pressed[0] and (rect_level1.collidepoint(event.pos) or
-                                   rect_level2.collidepoint(event.pos) or rect_level3.collidepoint(event.pos)):
+                elif pressed[0] and rect_level4.collidepoint(event.pos) and not flag_main_menu:
+                    player, level_x, level_y, level = generate_level(load_level('map4.txt'))
+                    flag_name_map = 4
+                elif pressed[0] and rect_level5.collidepoint(event.pos) and not flag_main_menu:
+                    player, level_x, level_y, level = generate_level(load_level('map5.txt'))
+                    flag_name_map = 5
+                elif pressed[0] and rect_level6.collidepoint(event.pos) and not flag_main_menu:
+                    player, level_x, level_y, level = generate_level(load_level('map6.txt'))
+                    flag_name_map = 6
+                if pressed[0] and (rect_level1.collidepoint(event.pos) or rect_level2.collidepoint(event.pos) or \
+                                   rect_level3.collidepoint(event.pos) or rect_level4.collidepoint(event.pos) or \
+                                   rect_level5.collidepoint(event.pos) or rect_level6.collidepoint(event.pos)):
                     screen.blit(fon, (0, 0))
                     home = load_image('home.png')
                     rect_h = pygame.Rect(0, 600, 50, 50)
@@ -340,6 +356,7 @@ def start_screen():
                     start_screen()
         pygame.display.flip()
         clock.tick(FPS)
+
 
 pygame.init()
 fullname = os.path.join('data', 'fon_music.mp3')
