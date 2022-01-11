@@ -2,13 +2,13 @@ import sys
 import pygame
 import os
 
-
 FPS = 50
 player = None
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 box_group = pygame.sprite.Group()
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -18,14 +18,21 @@ def load_image(name, colorkey=None):
     image = pygame.image.load(fullname)
     return image
 
+
 tile_images = {
     'wall': load_image('box.png'),
     'empty': load_image('grass.png')
 }
-player_image = load_image('ironman.png')
+player_image = load_image('mario.png')
 box_image = load_image('move_box.png')
 destination_image = load_image('destination.png')
 tile_width = tile_height = 50
+
+destinations = []
+boxes = []
+boxes_coords = []
+
+sound = 'sound_on.png'
 
 
 def load_level(filename):
@@ -54,40 +61,49 @@ class Player(pygame.sprite.Sprite):
             tile_width * self.pos_x + 15, tile_height * self.pos_y + 5)
 
     def move(self, event):
-        global all_sprites, tiles_group, player_group, box_group, destination, box, player, level_x, level_y, level
+        global all_sprites, tiles_group, player_group, box_group, player, level_x, level_y, level, boxes, boxes_coords
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT and level[self.pos_y][self.pos_x - 1] != '#':
+            if event.key == pygame.K_LEFT and level[self.pos_y][self.pos_x - 1] != '#' and not \
+                    (level[self.pos_y][self.pos_x - 1] == '?' and level[self.pos_y][self.pos_x - 2] == '?'):
                 if level[self.pos_y][self.pos_x - 1] == '?':
                     if level[self.pos_y][self.pos_x - 2] != '#':
-                        box.move(self.pos_x - 2, self.pos_y, 'left')
+                        boxes[boxes_coords.index((self.pos_x - 1, self.pos_y))].move(self.pos_x - 2, self.pos_y, 'left')
+                        boxes_coords[boxes_coords.index((self.pos_x - 1, self.pos_y))] = (self.pos_x - 2, self.pos_y)
                         self.pos_x -= 1
                 else:
                     self.pos_x -= 1
-            elif event.key == pygame.K_RIGHT and level[self.pos_y][self.pos_x + 1] != '#':
+            elif event.key == pygame.K_RIGHT and level[self.pos_y][self.pos_x + 1] != '#' and not \
+                    (level[self.pos_y][self.pos_x + 1] == '?' and level[self.pos_y][self.pos_x + 2] == '?'):
                 if level[self.pos_y][self.pos_x + 1] == '?':
                     if level[self.pos_y][self.pos_x + 2] != '#':
-                        box.move(self.pos_x + 2, self.pos_y, 'right')
+                        boxes[boxes_coords.index((self.pos_x + 1, self.pos_y))].move(self.pos_x + 2, self.pos_y,
+                                                                                     'right')
+                        boxes_coords[boxes_coords.index((self.pos_x + 1, self.pos_y))] = (self.pos_x + 2, self.pos_y)
                         self.pos_x += 1
                 else:
                     self.pos_x += 1
-            elif event.key == pygame.K_UP and level[self.pos_y - 1][self.pos_x] != '#':
+            elif event.key == pygame.K_UP and level[self.pos_y - 1][self.pos_x] != '#' and not \
+                    (level[self.pos_y - 1][self.pos_x] == '?' and level[self.pos_y - 2][self.pos_x] == '?'):
                 if level[self.pos_y - 1][self.pos_x] == '?':
                     if level[self.pos_y - 2][self.pos_x] != '#':
-                        box.move(self.pos_x, self.pos_y - 2, 'up')
+                        boxes[boxes_coords.index((self.pos_x, self.pos_y - 1))].move(self.pos_x, self.pos_y - 2, 'up')
+                        boxes_coords[boxes_coords.index((self.pos_x, self.pos_y - 1))] = (self.pos_x, self.pos_y - 2)
                         self.pos_y -= 1
                 else:
                     self.pos_y -= 1
-            elif event.key == pygame.K_DOWN and level[self.pos_y + 1][self.pos_x] != '#':
+            elif event.key == pygame.K_DOWN and level[self.pos_y + 1][self.pos_x] != '#' and not \
+                    (level[self.pos_y + 1][self.pos_x] == '?' and level[self.pos_y + 2][self.pos_x] == '?'):
                 if level[self.pos_y + 1][self.pos_x] == '?':
                     if level[self.pos_y + 2][self.pos_x] != '#':
-                        box.move(self.pos_x, self.pos_y + 2, 'down')
+                        boxes[boxes_coords.index((self.pos_x, self.pos_y + 1))].move(self.pos_x, self.pos_y + 2, 'down')
+                        boxes_coords[boxes_coords.index((self.pos_x, self.pos_y + 1))] = (self.pos_x, self.pos_y + 2)
                         self.pos_y += 1
                 else:
                     self.pos_y += 1
         self.image = player_image
         self.rect = self.image.get_rect().move(
             tile_width * self.pos_x + 15, tile_height * self.pos_y + 5)
-        if box.pos_x == destination.pos_x and box.pos_y == destination.pos_y:
+        if sorted(boxes_coords) == sorted(destinations):
             all_sprites = pygame.sprite.Group()
             tiles_group = pygame.sprite.Group()
             player_group = pygame.sprite.Group()
@@ -100,6 +116,7 @@ class Box(pygame.sprite.Sprite):
         super().__init__(box_group, all_sprites)
         self.pos_x = pos_x
         self.pos_y = pos_y
+        boxes_coords.append((pos_x, pos_y))
         self.image = box_image
         self.rect = self.image.get_rect().move(
             tile_width * self.pos_x, tile_height * self.pos_y)
@@ -140,6 +157,7 @@ class Destination(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.pos_x = pos_x
         self.pos_y = pos_y
+        destinations.append((pos_x, pos_y))
         self.image = destination_image
         self.rect = self.image.get_rect().move(
             tile_width * self.pos_x, tile_height * self.pos_y)
@@ -158,11 +176,11 @@ def generate_level(level):
                 new_player = Player(x, y)
             elif level[y][x] == '?':
                 Tile('empty', x, y)
-                new_box = Box(x, y)
+                boxes.append(Box(x, y))
             elif level[y][x] == 'x':
                 Tile('empty', x, y)
-                new_destination = Destination(x, y)
-    return new_destination, new_box, new_player, x, y, level
+                Destination(x, y)
+    return new_player, x, y, level
 
 
 def terminate():
@@ -171,74 +189,43 @@ def terminate():
 
 
 def start_screen():
-    global all_sprites, tiles_group, player_group, box_group, destination, box, player, level_x, level_y, level
+    global all_sprites, tiles_group, player_group, box_group, player, \
+        level_x, level_y, level, boxes, boxes_coords, destinations, sound, tile_images
     flag_game = False
     flag_levels = False
     flag_rules = False
     flag_main_menu = True
     flag_name_map = 0
-    fon = load_image('fon.jpg')
+    fon = load_image('fon.png')
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 100)
-    text = font.render("Начать", True, 'purple')
-    text_x = 184
-    text_y = 132
-    text_w = text.get_width()
-    text_h = text.get_height()
-    screen.blit(text, (text_x, text_y))
-    rect = pygame.Rect(text_x - 10, text_y - 10, text_w + 20, text_h + 20)
 
-    font1 = pygame.font.Font(None, 125)
-    font1.set_italic(True)
-    text1 = font1.render("Сокобан", True, 'Peru')
-    text_x1 = 111
-    text_y1 = 27
-    screen.blit(text1, (text_x1, text_y1))
+    screen.blit(load_image('title.png'), (0, -10))
 
-    text2 = font.render("Скины", True, 'purple')
-    text_x2 = 188
-    text_y2 = 232
-    text_w2 = text2.get_width()
-    text_h2 = text2.get_height()
-    screen.blit(text2, (text_x2, text_y2))
-    rect2 = pygame.Rect(text_x2 - 10, text_y2 - 10, text_w2 + 20, text_h2 + 20)
+    screen.blit(load_image('start.png'), (200, 145))
+    rect = pygame.Rect(200, 145, 201, 66)
 
-    text3 = font.render("Настройки", True, 'purple')
-    text_x3 = 120
-    text_y3 = 332
-    text_w3 = text3.get_width()
-    text_h3 = text3.get_height()
-    screen.blit(text3, (text_x3, text_y3))
-    rect3 = pygame.Rect(text_x3 - 10, text_y3 - 10, text_w3 + 20, text_h3 + 20)
+    screen.blit(load_image('music.png'), (194, 220))
+    rect2 = pygame.Rect(194, 220, 212, 76)
 
-    text4 = font.render("Об игре", True, 'purple')
-    text_x4 = 168
-    text_y4 = 432
-    text_w4 = text4.get_width()
-    text_h4 = text4.get_height()
-    screen.blit(text4, (text_x4, text_y4))
-    rect4 = pygame.Rect(text_x4 - 10, text_y4 - 10, text_w4 + 20, text_h4 + 20)
+    screen.blit(load_image('skins.png'), (198, 295))
+    rect3 = pygame.Rect(198, 295, 184, 69)
 
-    text5 = font.render("Выход", True, 'purple')
-    text_x5 = 181
-    text_y5 = 560
-    text_w5 = text5.get_width()
-    text_h5 = text5.get_height()
-    screen.blit(text5, (text_x5, text_y5))
-    rect5 = pygame.Rect(text_x5 - 10, text_y5 - 10, text_w5 + 20, text_h5 + 20)
+    screen.blit(load_image('info.png'), (193, 370))
+    rect4 = pygame.Rect(193, 370, 215, 83)
 
-    pygame.draw.rect(screen, 'green', rect, 3)
-    pygame.draw.rect(screen, 'green', rect2, 3)
-    pygame.draw.rect(screen, 'green', rect3, 3)
-    pygame.draw.rect(screen, 'green', rect4, 3)
-    pygame.draw.rect(screen, 'green', rect5, 3)
+    screen.blit(load_image('exit.png'), (209, 445))
+    rect5 = pygame.Rect(209, 445, 183, 76)
 
-    pygame.mixer.music.play(-1)
-    pygame.mixer.music.set_volume(0.25)
+    screen.blit(load_image(sound), (1, 579))
+    rect_sound = pygame.Rect(1, 579, 70, 70)
+
+    boxes = []
+    boxes_coords = []
+    destinations = []
     while True:
         for event in pygame.event.get():
             pressed = pygame.mouse.get_pressed()
-            if event.type == pygame.QUIT or (pressed[0] and rect5.collidepoint(event.pos) and flag_main_menu):
+            if event.type == pygame.QUIT or pressed[0] and rect5.collidepoint(event.pos) and flag_main_menu:
                 terminate()
             elif event.type == pygame.KEYDOWN and flag_game:
                 steps.play()
@@ -246,18 +233,36 @@ def start_screen():
                 all_sprites.draw(screen)
                 box_group.draw(screen)
                 player_group.draw(screen)
+            if pressed[0] and rect_sound.collidepoint(event.pos) and flag_main_menu:
+                if sound == 'sound_on.png':
+                    sound = 'sound_off.png'
+                    pygame.mixer.music.set_volume(0)
+                else:
+                    sound = 'sound_on.png'
+                    pygame.mixer.music.set_volume(0.15)
+                screen.blit(load_image(sound), (1, 579))
             if flag_levels:
                 if pressed[0] and rect_level1.collidepoint(event.pos):
-                    destination, box, player, level_x, level_y, level = generate_level(load_level('map1.txt'))
+                    player, level_x, level_y, level = generate_level(load_level('map1.txt'))
                     flag_name_map = 1
-                if pressed[0] and rect_level2.collidepoint(event.pos) and not flag_main_menu:
-                    destination, box, player, level_x, level_y, level = generate_level(load_level('map2.txt'))
+                elif pressed[0] and rect_level2.collidepoint(event.pos) and not flag_main_menu:
+                    player, level_x, level_y, level = generate_level(load_level('map2.txt'))
                     flag_name_map = 2
-                if pressed[0] and rect_level3.collidepoint(event.pos) and not flag_main_menu:
-                    destination, box, player, level_x, level_y, level = generate_level(load_level('map3.txt'))
+                elif pressed[0] and rect_level3.collidepoint(event.pos) and not flag_main_menu:
+                    player, level_x, level_y, level = generate_level(load_level('map3.txt'))
                     flag_name_map = 3
-                if pressed[0] and (rect_level1.collidepoint(event.pos) or
-                                   rect_level2.collidepoint(event.pos) or rect_level3.collidepoint(event.pos)):
+                elif pressed[0] and rect_level4.collidepoint(event.pos) and not flag_main_menu:
+                    player, level_x, level_y, level = generate_level(load_level('map4.txt'))
+                    flag_name_map = 4
+                elif pressed[0] and rect_level5.collidepoint(event.pos) and not flag_main_menu:
+                    player, level_x, level_y, level = generate_level(load_level('map5.txt'))
+                    flag_name_map = 5
+                elif pressed[0] and rect_level6.collidepoint(event.pos) and not flag_main_menu:
+                    player, level_x, level_y, level = generate_level(load_level('map6.txt'))
+                    flag_name_map = 6
+                if pressed[0] and (rect_level1.collidepoint(event.pos) or rect_level2.collidepoint(event.pos) or \
+                                   rect_level3.collidepoint(event.pos) or rect_level4.collidepoint(event.pos) or \
+                                   rect_level5.collidepoint(event.pos) or rect_level6.collidepoint(event.pos)):
                     screen.blit(fon, (0, 0))
                     home = load_image('home.png')
                     rect_h = pygame.Rect(0, 600, 50, 50)
@@ -311,7 +316,10 @@ def start_screen():
                     tiles_group = pygame.sprite.Group()
                     player_group = pygame.sprite.Group()
                     box_group = pygame.sprite.Group()
-                    destination, box, player, level_x, level_y, level = \
+                    boxes = []
+                    boxes_coords = []
+                    destinations = []
+                    player, level_x, level_y, level = \
                         generate_level(load_level(f'map{flag_name_map}.txt'))
                     all_sprites.draw(screen)
                     box_group.draw(screen)
@@ -326,9 +334,12 @@ def start_screen():
         pygame.display.flip()
         clock.tick(FPS)
 
+
 pygame.init()
 fullname = os.path.join('data', 'fon_music.mp3')
 pygame.mixer.music.load(fullname)
+pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.15)
 
 fullname = os.path.join('data', 'steps.mp3')
 steps = pygame.mixer.Sound(fullname)
