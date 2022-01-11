@@ -32,6 +32,8 @@ destinations = []
 boxes = []
 boxes_coords = []
 
+sound = 'sound_on.png'
+
 
 def load_level(filename):
     filename = "data/" + filename
@@ -188,7 +190,7 @@ def terminate():
 
 def start_screen():
     global all_sprites, tiles_group, player_group, box_group, player, \
-        level_x, level_y, level, boxes, boxes_coords, destinations
+        level_x, level_y, level, boxes, boxes_coords, destination, sound, tile_images
     flag_game = False
     flag_levels = False
     flag_rules = False
@@ -250,6 +252,9 @@ def start_screen():
     pygame.draw.rect(screen, 'green', rect4, 3)
     pygame.draw.rect(screen, 'green', rect5, 3)
 
+    screen.blit(load_image(sound), (1, 579))
+    rect_sound = pygame.Rect(1, 579, 70, 70)
+
     boxes = []
     boxes_coords = []
     destinations = []
@@ -264,6 +269,14 @@ def start_screen():
                 all_sprites.draw(screen)
                 box_group.draw(screen)
                 player_group.draw(screen)
+            if pressed[0] and rect_sound.collidepoint(event.pos) and flag_main_menu:
+                if sound == 'sound_on.png':
+                    sound = 'sound_off.png'
+                    pygame.mixer.music.set_volume(0)
+                else:
+                    sound = 'sound_on.png'
+                    pygame.mixer.music.set_volume(0.15)
+                screen.blit(load_image(sound), (1, 579))
             if flag_levels:
                 if pressed[0] and rect_level1.collidepoint(event.pos):
                     player, level_x, level_y, level = generate_level(load_level('map1.txt'))
@@ -362,7 +375,7 @@ pygame.init()
 fullname = os.path.join('data', 'fon_music.mp3')
 pygame.mixer.music.load(fullname)
 pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(0.25)
+pygame.mixer.music.set_volume(0.15)
 
 fullname = os.path.join('data', 'steps.mp3')
 steps = pygame.mixer.Sound(fullname)
