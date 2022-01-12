@@ -103,12 +103,6 @@ class Player(pygame.sprite.Sprite):
         self.image = player_image
         self.rect = self.image.get_rect().move(
             tile_width * self.pos_x + 15, tile_height * self.pos_y + 5)
-        if sorted(boxes_coords) == sorted(destinations):
-            all_sprites = pygame.sprite.Group()
-            tiles_group = pygame.sprite.Group()
-            player_group = pygame.sprite.Group()
-            box_group = pygame.sprite.Group()
-            start_screen()
 
 
 class Box(pygame.sprite.Sprite):
@@ -189,68 +183,33 @@ def terminate():
 
 
 def start_screen():
-    global all_sprites, tiles_group, player_group, box_group, player, \
-        level_x, level_y, level, boxes, boxes_coords, destination, sound, tile_images
+    global all_sprites, tiles_group, player_group, box_group, player, box_image, \
+        level_x, level_y, level, boxes, boxes_coords, destinations, sound, tile_images
     flag_game = False
+    flag_endgame = False
     flag_levels = False
     flag_rules = False
     flag_main_menu = True
     flag_name_map = 0
-    fon = load_image('fon.jpg')
+    fon = load_image('fon.png')
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 100)
-    text = font.render("Начать", True, 'purple')
-    text_x = 184
-    text_y = 132
-    text_w = text.get_width()
-    text_h = text.get_height()
-    screen.blit(text, (text_x, text_y))
-    rect = pygame.Rect(text_x - 10, text_y - 10, text_w + 20, text_h + 20)
 
-    font1 = pygame.font.Font(None, 125)
-    font1.set_italic(True)
-    text1 = font1.render("Сокобан", True, 'Peru')
-    text_x1 = 111
-    text_y1 = 27
-    screen.blit(text1, (text_x1, text_y1))
+    screen.blit(load_image('title.png'), (0, -10))
 
-    text2 = font.render("Скины", True, 'purple')
-    text_x2 = 188
-    text_y2 = 232
-    text_w2 = text2.get_width()
-    text_h2 = text2.get_height()
-    screen.blit(text2, (text_x2, text_y2))
-    rect2 = pygame.Rect(text_x2 - 10, text_y2 - 10, text_w2 + 20, text_h2 + 20)
+    screen.blit(load_image('start.png'), (200, 145))
+    rect = pygame.Rect(200, 145, 201, 66)
 
-    text3 = font.render("Настройки", True, 'purple')
-    text_x3 = 120
-    text_y3 = 332
-    text_w3 = text3.get_width()
-    text_h3 = text3.get_height()
-    screen.blit(text3, (text_x3, text_y3))
-    rect3 = pygame.Rect(text_x3 - 10, text_y3 - 10, text_w3 + 20, text_h3 + 20)
+    screen.blit(load_image('music.png'), (194, 220))
+    rect2 = pygame.Rect(194, 220, 212, 76)
 
-    text4 = font.render("Об игре", True, 'purple')
-    text_x4 = 168
-    text_y4 = 432
-    text_w4 = text4.get_width()
-    text_h4 = text4.get_height()
-    screen.blit(text4, (text_x4, text_y4))
-    rect4 = pygame.Rect(text_x4 - 10, text_y4 - 10, text_w4 + 20, text_h4 + 20)
+    screen.blit(load_image('skins.png'), (198, 295))
+    rect3 = pygame.Rect(198, 295, 184, 69)
 
-    text5 = font.render("Выход", True, 'purple')
-    text_x5 = 181
-    text_y5 = 560
-    text_w5 = text5.get_width()
-    text_h5 = text5.get_height()
-    screen.blit(text5, (text_x5, text_y5))
-    rect5 = pygame.Rect(text_x5 - 10, text_y5 - 10, text_w5 + 20, text_h5 + 20)
+    screen.blit(load_image('info.png'), (193, 370))
+    rect4 = pygame.Rect(193, 370, 215, 83)
 
-    pygame.draw.rect(screen, 'green', rect, 3)
-    pygame.draw.rect(screen, 'green', rect2, 3)
-    pygame.draw.rect(screen, 'green', rect3, 3)
-    pygame.draw.rect(screen, 'green', rect4, 3)
-    pygame.draw.rect(screen, 'green', rect5, 3)
+    screen.blit(load_image('exit.png'), (209, 445))
+    rect5 = pygame.Rect(209, 445, 183, 76)
 
     screen.blit(load_image(sound), (1, 579))
     rect_sound = pygame.Rect(1, 579, 70, 70)
@@ -269,6 +228,13 @@ def start_screen():
                 all_sprites.draw(screen)
                 box_group.draw(screen)
                 player_group.draw(screen)
+                if sorted(boxes_coords) == sorted(destinations):
+                    screen.blit(load_image('end_game.jpg'), (0, 0))
+                    screen.blit(load_image('back.png'), (176, 480))
+                    screen.blit(load_image('congrats.png'), (6, 60))
+                    flag_game = False
+                    flag_endgame = True
+                    rect_endgame = pygame.Rect(176, 480, 248, 111)
             if pressed[0] and rect_sound.collidepoint(event.pos) and flag_main_menu:
                 if sound == 'sound_on.png':
                     sound = 'sound_off.png'
@@ -276,30 +242,61 @@ def start_screen():
                 else:
                     sound = 'sound_on.png'
                     pygame.mixer.music.set_volume(0.15)
+                start_screen()
                 screen.blit(load_image(sound), (1, 579))
             if flag_levels:
                 if pressed[0] and rect_level1.collidepoint(event.pos):
+                    tile_images = {
+                        'wall': load_image('box.png'),
+                        'empty': load_image('grass.png')
+                    }
+                    box_image = load_image('move_box.png')
                     player, level_x, level_y, level = generate_level(load_level('map1.txt'))
                     flag_name_map = 1
                 elif pressed[0] and rect_level2.collidepoint(event.pos) and not flag_main_menu:
+                    tile_images = {
+                        'wall': load_image('box.png'),
+                        'empty': load_image('grass.png')
+                    }
+                    box_image = load_image('move_box.png')
                     player, level_x, level_y, level = generate_level(load_level('map2.txt'))
                     flag_name_map = 2
                 elif pressed[0] and rect_level3.collidepoint(event.pos) and not flag_main_menu:
+                    tile_images = {
+                        'wall': load_image('stena.png'),
+                        'empty': load_image('pol.png')
+                    }
+                    box_image = load_image('move_box.png')
                     player, level_x, level_y, level = generate_level(load_level('map3.txt'))
                     flag_name_map = 3
                 elif pressed[0] and rect_level4.collidepoint(event.pos) and not flag_main_menu:
+                    tile_images = {
+                        'wall': load_image('stena.png'),
+                        'empty': load_image('pol.png')
+                    }
+                    box_image = load_image('move_box.png')
                     player, level_x, level_y, level = generate_level(load_level('map4.txt'))
                     flag_name_map = 4
                 elif pressed[0] and rect_level5.collidepoint(event.pos) and not flag_main_menu:
+                    tile_images = {
+                        'wall': load_image('sand_wall.png'),
+                        'empty': load_image('sand.jpg')
+                    }
+                    box_image = load_image('sand_box.jpg')
                     player, level_x, level_y, level = generate_level(load_level('map5.txt'))
                     flag_name_map = 5
                 elif pressed[0] and rect_level6.collidepoint(event.pos) and not flag_main_menu:
+                    tile_images = {
+                        'wall': load_image('ice.png'),
+                        'empty': load_image('snow.jpg')
+                    }
+                    box_image = load_image('snow_box.png')
                     player, level_x, level_y, level = generate_level(load_level('map6.txt'))
                     flag_name_map = 6
                 if pressed[0] and (rect_level1.collidepoint(event.pos) or rect_level2.collidepoint(event.pos) or \
                                    rect_level3.collidepoint(event.pos) or rect_level4.collidepoint(event.pos) or \
                                    rect_level5.collidepoint(event.pos) or rect_level6.collidepoint(event.pos)):
-                    screen.blit(fon, (0, 0))
+                    screen.fill((41, 49, 51))
                     home = load_image('home.png')
                     rect_h = pygame.Rect(0, 600, 50, 50)
                     screen.blit(home, (0, 600))
@@ -367,6 +364,30 @@ def start_screen():
                     player_group = pygame.sprite.Group()
                     box_group = pygame.sprite.Group()
                     start_screen()
+            if flag_endgame:
+                if pressed[0] and rect_endgame.collidepoint(event.pos):
+                    screen.blit(fon, (0, 0))
+                    screen.blit(load_image('levels.png'), (0, 0))
+                    screen.blit(load_image('level_1.png'), (60, 150))
+                    screen.blit(load_image('level_2.png'), (230, 150))
+                    screen.blit(load_image('level_3.png'), (400, 150))
+                    screen.blit(load_image('level_4.png'), (60, 350))
+                    screen.blit(load_image('level_5.png'), (230, 350))
+                    screen.blit(load_image('level_6.png'), (400, 350))
+                    screen.blit(load_image('home_2.png'), (243, 535))
+                    rect_h1 = pygame.Rect(243, 535, 115, 115)
+                    rect_level1 = pygame.Rect(60, 150, 140, 140)
+                    rect_level2 = pygame.Rect(230, 150, 140, 140)
+                    rect_level3 = pygame.Rect(400, 150, 140, 140)
+                    rect_level4 = pygame.Rect(60, 350, 140, 140)
+                    rect_level5 = pygame.Rect(230, 350, 140, 140)
+                    rect_level6 = pygame.Rect(400, 350, 140, 140)
+                    flag_levels = True
+                    flag_endgame = False
+                    all_sprites = pygame.sprite.Group()
+                    tiles_group = pygame.sprite.Group()
+                    player_group = pygame.sprite.Group()
+                    box_group = pygame.sprite.Group()
         pygame.display.flip()
         clock.tick(FPS)
 
