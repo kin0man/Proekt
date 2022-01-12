@@ -103,12 +103,6 @@ class Player(pygame.sprite.Sprite):
         self.image = player_image
         self.rect = self.image.get_rect().move(
             tile_width * self.pos_x + 15, tile_height * self.pos_y + 5)
-        if sorted(boxes_coords) == sorted(destinations):
-            all_sprites = pygame.sprite.Group()
-            tiles_group = pygame.sprite.Group()
-            player_group = pygame.sprite.Group()
-            box_group = pygame.sprite.Group()
-            start_screen()
 
 
 class Box(pygame.sprite.Sprite):
@@ -189,9 +183,10 @@ def terminate():
 
 
 def start_screen():
-    global all_sprites, tiles_group, player_group, box_group, player, \
+    global all_sprites, tiles_group, player_group, box_group, player, box_image, \
         level_x, level_y, level, boxes, boxes_coords, destinations, sound, tile_images
     flag_game = False
+    flag_endgame = False
     flag_levels = False
     flag_rules = False
     flag_main_menu = True
@@ -233,6 +228,13 @@ def start_screen():
                 all_sprites.draw(screen)
                 box_group.draw(screen)
                 player_group.draw(screen)
+                if sorted(boxes_coords) == sorted(destinations):
+                    screen.blit(load_image('end_game.jpg'), (0, 0))
+                    screen.blit(load_image('back.png'), (176, 480))
+                    screen.blit(load_image('congrats.png'), (6, 60))
+                    flag_game = False
+                    flag_endgame = True
+                    rect_endgame = pygame.Rect(176, 480, 248, 111)
             if pressed[0] and rect_sound.collidepoint(event.pos) and flag_main_menu:
                 if sound == 'sound_on.png':
                     sound = 'sound_off.png'
@@ -240,30 +242,72 @@ def start_screen():
                 else:
                     sound = 'sound_on.png'
                     pygame.mixer.music.set_volume(0.15)
+                start_screen()
                 screen.blit(load_image(sound), (1, 579))
             if flag_levels:
                 if pressed[0] and rect_level1.collidepoint(event.pos):
+                    tile_images = {
+                        'wall': load_image('box.png'),
+                        'empty': load_image('grass.png')
+                    }
+                    box_image = load_image('move_box.png')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('1_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map1.txt'))
                     flag_name_map = 1
                 elif pressed[0] and rect_level2.collidepoint(event.pos) and not flag_main_menu:
+                    tile_images = {
+                        'wall': load_image('box.png'),
+                        'empty': load_image('grass.png')
+                    }
+                    box_image = load_image('move_box.png')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('2_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map2.txt'))
                     flag_name_map = 2
                 elif pressed[0] and rect_level3.collidepoint(event.pos) and not flag_main_menu:
+                    tile_images = {
+                        'wall': load_image('stena.png'),
+                        'empty': load_image('pol.png')
+                    }
+                    box_image = load_image('move_box.png')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('3_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map3.txt'))
                     flag_name_map = 3
                 elif pressed[0] and rect_level4.collidepoint(event.pos) and not flag_main_menu:
+                    tile_images = {
+                        'wall': load_image('stena.png'),
+                        'empty': load_image('pol.png')
+                    }
+                    box_image = load_image('move_box.png')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('4_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map4.txt'))
                     flag_name_map = 4
                 elif pressed[0] and rect_level5.collidepoint(event.pos) and not flag_main_menu:
+                    tile_images = {
+                        'wall': load_image('sand_wall.png'),
+                        'empty': load_image('sand.jpg')
+                    }
+                    box_image = load_image('sand_box.jpg')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('5_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map5.txt'))
                     flag_name_map = 5
                 elif pressed[0] and rect_level6.collidepoint(event.pos) and not flag_main_menu:
+                    tile_images = {
+                        'wall': load_image('ice.png'),
+                        'empty': load_image('snow.jpg')
+                    }
+                    box_image = load_image('snow_box.png')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('6_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map6.txt'))
                     flag_name_map = 6
                 if pressed[0] and (rect_level1.collidepoint(event.pos) or rect_level2.collidepoint(event.pos) or \
                                    rect_level3.collidepoint(event.pos) or rect_level4.collidepoint(event.pos) or \
                                    rect_level5.collidepoint(event.pos) or rect_level6.collidepoint(event.pos)):
-                    screen.blit(fon, (0, 0))
                     home = load_image('home.png')
                     rect_h = pygame.Rect(0, 600, 50, 50)
                     screen.blit(home, (0, 600))
@@ -331,6 +375,30 @@ def start_screen():
                     player_group = pygame.sprite.Group()
                     box_group = pygame.sprite.Group()
                     start_screen()
+            if flag_endgame:
+                if pressed[0] and rect_endgame.collidepoint(event.pos):
+                    screen.blit(fon, (0, 0))
+                    screen.blit(load_image('levels.png'), (0, 0))
+                    screen.blit(load_image('level_1.png'), (60, 150))
+                    screen.blit(load_image('level_2.png'), (230, 150))
+                    screen.blit(load_image('level_3.png'), (400, 150))
+                    screen.blit(load_image('level_4.png'), (60, 350))
+                    screen.blit(load_image('level_5.png'), (230, 350))
+                    screen.blit(load_image('level_6.png'), (400, 350))
+                    screen.blit(load_image('home_2.png'), (243, 535))
+                    rect_h1 = pygame.Rect(243, 535, 115, 115)
+                    rect_level1 = pygame.Rect(60, 150, 140, 140)
+                    rect_level2 = pygame.Rect(230, 150, 140, 140)
+                    rect_level3 = pygame.Rect(400, 150, 140, 140)
+                    rect_level4 = pygame.Rect(60, 350, 140, 140)
+                    rect_level5 = pygame.Rect(230, 350, 140, 140)
+                    rect_level6 = pygame.Rect(400, 350, 140, 140)
+                    flag_levels = True
+                    flag_endgame = False
+                    all_sprites = pygame.sprite.Group()
+                    tiles_group = pygame.sprite.Group()
+                    player_group = pygame.sprite.Group()
+                    box_group = pygame.sprite.Group()
         pygame.display.flip()
         clock.tick(FPS)
 
