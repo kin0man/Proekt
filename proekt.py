@@ -190,6 +190,7 @@ def start_screen():
     flag_levels = False
     flag_rules = False
     flag_main_menu = True
+    flag_skins = False
     flag_name_map = 0
     fon = load_image('fon.png')
     screen.blit(fon, (0, 0))
@@ -251,6 +252,8 @@ def start_screen():
                         'empty': load_image('grass.png')
                     }
                     box_image = load_image('move_box.png')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('1_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map1.txt'))
                     flag_name_map = 1
                 elif pressed[0] and rect_level2.collidepoint(event.pos) and not flag_main_menu:
@@ -259,6 +262,8 @@ def start_screen():
                         'empty': load_image('grass.png')
                     }
                     box_image = load_image('move_box.png')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('2_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map2.txt'))
                     flag_name_map = 2
                 elif pressed[0] and rect_level3.collidepoint(event.pos) and not flag_main_menu:
@@ -267,6 +272,8 @@ def start_screen():
                         'empty': load_image('pol.png')
                     }
                     box_image = load_image('move_box.png')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('3_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map3.txt'))
                     flag_name_map = 3
                 elif pressed[0] and rect_level4.collidepoint(event.pos) and not flag_main_menu:
@@ -275,6 +282,8 @@ def start_screen():
                         'empty': load_image('pol.png')
                     }
                     box_image = load_image('move_box.png')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('4_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map4.txt'))
                     flag_name_map = 4
                 elif pressed[0] and rect_level5.collidepoint(event.pos) and not flag_main_menu:
@@ -283,6 +292,8 @@ def start_screen():
                         'empty': load_image('sand.jpg')
                     }
                     box_image = load_image('sand_box.jpg')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('5_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map5.txt'))
                     flag_name_map = 5
                 elif pressed[0] and rect_level6.collidepoint(event.pos) and not flag_main_menu:
@@ -291,12 +302,13 @@ def start_screen():
                         'empty': load_image('snow.jpg')
                     }
                     box_image = load_image('snow_box.png')
+                    screen.fill((41, 49, 51))
+                    screen.blit(load_image('6_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map6.txt'))
                     flag_name_map = 6
                 if pressed[0] and (rect_level1.collidepoint(event.pos) or rect_level2.collidepoint(event.pos) or \
                                    rect_level3.collidepoint(event.pos) or rect_level4.collidepoint(event.pos) or \
                                    rect_level5.collidepoint(event.pos) or rect_level6.collidepoint(event.pos)):
-                    screen.fill((41, 49, 51))
                     home = load_image('home.png')
                     rect_h = pygame.Rect(0, 600, 50, 50)
                     screen.blit(home, (0, 600))
@@ -337,6 +349,26 @@ def start_screen():
                 rect_h1 = pygame.Rect(243, 535, 115, 115)
                 flag_rules = True
                 flag_main_menu = False
+            if pressed[0] and rect3.collidepoint(event.pos) and flag_main_menu:
+                flag_main_menu = False
+                flag_skins = True
+                screen.fill((41, 49, 51))
+                screen.blit(load_image('home_2.png'), (243, 535))
+                rect_h2 = pygame.Rect(243, 535, 115, 115)
+                screen.blit(load_image('skins_1.png'), (171, 20))
+                skins = ['pinguin_100.png', 'TV_100.png', 'akatsuki_100.png']
+                for i in range(3):
+                    screen.blit(load_image('ramka.png'), (50 + 100 * i, 275))
+                    screen.blit(load_image(skins[i]), (50 + 100 * i, 275))
+            if flag_skins:
+                if pressed[0] and rect_h2.collidepoint(event.pos):
+                    flag_main_menu = True
+                    flag_skins = False
+                    all_sprites = pygame.sprite.Group()
+                    tiles_group = pygame.sprite.Group()
+                    player_group = pygame.sprite.Group()
+                    box_group = pygame.sprite.Group()
+                    start_screen()
             if flag_game:
                 if pressed[0] and rect_h.collidepoint(event.pos):
                     all_sprites = pygame.sprite.Group()
