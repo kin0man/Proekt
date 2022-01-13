@@ -356,10 +356,11 @@ def start_screen():
                 screen.blit(load_image('home_2.png'), (243, 535))
                 rect_h2 = pygame.Rect(243, 535, 115, 115)
                 screen.blit(load_image('skins_1.png'), (171, 20))
-                skins = ['pinguin_100.png', 'TV_100.png', 'akatsuki_100.png']
-                for i in range(3):
+                for i in range(5):
                     screen.blit(load_image('ramka.png'), (50 + 100 * i, 275))
-                    screen.blit(load_image(skins[i]), (50 + 100 * i, 275))
+                screen.blit(load_image('pinguin_100.png'), (50, 275))
+                screen.blit(load_image('TV_100.png'), (155, 285))
+                screen.blit(load_image('akatsuki_100.png'), (248, 275))
             if flag_skins:
                 if pressed[0] and rect_h2.collidepoint(event.pos):
                     flag_main_menu = True
