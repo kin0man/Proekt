@@ -184,7 +184,8 @@ def terminate():
 
 def start_screen():
     global all_sprites, tiles_group, player_group, box_group, player, box_image, \
-        level_x, level_y, level, boxes, boxes_coords, destinations, sound, tile_images, player_image, Music
+        level_x, level_y, level, boxes, boxes_coords, destinations, sound, tile_images, \
+        player_image, Music, flag_change_music
     flag_game = False
     flag_endgame = False
     flag_levels = False
@@ -219,11 +220,22 @@ def start_screen():
     boxes = []
     boxes_coords = []
     destinations = []
-    if Music == 'tin' and sound == 'sound_on.png':
-        fullname = os.path.join('data', 'main_tb_music.mp3')
-        pygame.mixer.music.load(fullname)
-        pygame.mixer.music.play(-1)
-        pygame.mixer.music.set_volume(0.5)
+    if sound == 'sound_on.png' and flag_change_music:
+        if Music == 'tin':
+            fullname = os.path.join('data', 'main_tb_music.mp3')
+            pygame.mixer.music.load(fullname)
+            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(0.35)
+        elif Music == 'eve':
+            fullname = os.path.join('data', 'main_ever_sum_music.mp3')
+            pygame.mixer.music.load(fullname)
+            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(0.2)
+        elif Music == 'cyb':
+            fullname = os.path.join('data', 'main_cyberpunk_music.mp3')
+            pygame.mixer.music.load(fullname)
+            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(0.25)
     while True:
         for event in pygame.event.get():
             pressed = pygame.mouse.get_pressed()
@@ -236,6 +248,11 @@ def start_screen():
                 box_group.draw(screen)
                 player_group.draw(screen)
                 if sorted(boxes_coords) == sorted(destinations):
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'win_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(1)
+                        pygame.mixer.music.set_volume(0.15)
                     screen.blit(load_image('end_game.jpg'), (0, 0))
                     screen.blit(load_image('back.png'), (176, 480))
                     screen.blit(load_image('congrats.png'), (6, 60))
@@ -248,34 +265,72 @@ def start_screen():
                     pygame.mixer.music.set_volume(0)
                 else:
                     sound = 'sound_on.png'
-                    pygame.mixer.music.set_volume(0.15)
+                    if Music == 'tin':
+                        pygame.mixer.music.set_volume(0.35)
+                    elif Music == 'eve':
+                        pygame.mixer.music.set_volume(0.2)
+                    elif Music == 'cyb':
+                        pygame.mixer.music.set_volume(0.25)
+                    elif Music == 'def':
+                        pygame.mixer.music.set_volume(0.15)
+                    elif Music == 'lof':
+                        pygame.mixer.music.set_volume(0.1)
+                    elif Music == 'mix':
+                        pygame.mixer.music.set_volume(0.23)
+                    elif Music == 'har':
+                        pygame.mixer.music.set_volume(0.9)
                 start_screen()
                 screen.blit(load_image(sound), (1, 579))
             if flag_music:
                 if pressed[0] and rect_def.collidepoint(event.pos):
+                    Music = 'def'
                     if sound == 'sound_on.png':
-                        Music = 'def'
                         fullname = os.path.join('data', 'fon_music.mp3')
                         pygame.mixer.music.load(fullname)
                         pygame.mixer.music.play(-1)
                         pygame.mixer.music.set_volume(0.15)
                 if pressed[0] and rect_tin.collidepoint(event.pos):
+                    Music = 'tin'
                     if sound == 'sound_on.png':
-                        Music = 'tin'
                         fullname = os.path.join('data', 'main_tb_music.mp3')
                         pygame.mixer.music.load(fullname)
                         pygame.mixer.music.play(-1)
-                        pygame.mixer.music.set_volume(0.4)
+                        pygame.mixer.music.set_volume(0.35)
                 if pressed[0] and rect_eve.collidepoint(event.pos):
                     Music = 'eve'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'main_ever_sum_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.2)
                 if pressed[0] and rect_cyb.collidepoint(event.pos):
                     Music = 'cyb'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'main_cyberpunk_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.25)
                 if pressed[0] and rect_lof.collidepoint(event.pos):
                     Music = 'lof'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'fon_lofi_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.1)
                 if pressed[0] and rect_mix.collidepoint(event.pos):
                     Music = 'mix'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'fon_mix_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.23)
                 if pressed[0] and rect_har.collidepoint(event.pos):
                     Music = 'har'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'fon_potter_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.9)
             if flag_levels:
                 if pressed[0] and rect_level1.collidepoint(event.pos):
                     tile_images = {
@@ -357,6 +412,16 @@ def start_screen():
                     pygame.mixer.music.load(fullname)
                     pygame.mixer.music.play(-1)
                     pygame.mixer.music.set_volume(0.4)
+                elif Music == 'eve' and sound == 'sound_on.png':
+                    fullname = os.path.join('data', 'fon_ever_sum_music.mp3')
+                    pygame.mixer.music.load(fullname)
+                    pygame.mixer.music.play(-1)
+                    pygame.mixer.music.set_volume(0.25)
+                elif Music == 'cyb' and sound == 'sound_on.png':
+                    fullname = os.path.join('data', 'fon_cyberpunk_music.mp3')
+                    pygame.mixer.music.load(fullname)
+                    pygame.mixer.music.play(-1)
+                    pygame.mixer.music.set_volume(0.2)
 
                 screen.blit(fon, (0, 0))
                 screen.blit(load_image('levels.png'), (0, 0))
@@ -381,7 +446,7 @@ def start_screen():
                     fullname = os.path.join('data', 'info_and_skins_tb_music.mp3')
                     pygame.mixer.music.load(fullname)
                     pygame.mixer.music.play(-1)
-                    pygame.mixer.music.set_volume(0.25)
+                    pygame.mixer.music.set_volume(0.2)
 
                 screen.blit(fon, (0, 0))
                 screen.blit(load_image('rules_1.png'), (0, 0))
@@ -397,7 +462,7 @@ def start_screen():
                     fullname = os.path.join('data', 'info_and_skins_tb_music.mp3')
                     pygame.mixer.music.load(fullname)
                     pygame.mixer.music.play(-1)
-                    pygame.mixer.music.set_volume(0.25)
+                    pygame.mixer.music.set_volume(0.2)
 
                 flag_main_menu = False
                 flag_skins = True
@@ -477,9 +542,55 @@ def start_screen():
                     tiles_group = pygame.sprite.Group()
                     player_group = pygame.sprite.Group()
                     box_group = pygame.sprite.Group()
+                    if Music != 'tin':
+                        if flag_music or flag_skins or flag_rules:
+                            flag_change_music = False
+                        else:
+                            flag_change_music = True
+                    else:
+                        if flag_music:
+                            flag_change_music = False
+                        else:
+                            flag_change_music = True
                     start_screen()
             if flag_endgame:
                 if pressed[0] and rect_endgame.collidepoint(event.pos):
+                    if sound == 'sound_on.png':
+                        if Music == 'tin':
+                            fullname = os.path.join('data', 'levels_tb_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.4)
+                        elif Music == 'eve' and sound == 'sound_on.png':
+                            fullname = os.path.join('data', 'fon_ever_sum_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.25)
+                        elif Music == 'lof':
+                            fullname = os.path.join('data', 'fon_lofi_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.1)
+                        elif Music == 'cyb':
+                            fullname = os.path.join('data', 'fon_cyberpunk_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.2)
+                        elif Music == 'har':
+                            fullname = os.path.join('data', 'fon_potter_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.9)
+                        elif Music == 'mix':
+                            fullname = os.path.join('data', 'fon_mix_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.23)
+                        elif Music == 'def':
+                            fullname = os.path.join('data', 'fon_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.15)
                     screen.blit(fon, (0, 0))
                     screen.blit(load_image('levels.png'), (0, 0))
                     screen.blit(load_image('level_1.png'), (60, 150))
@@ -510,13 +621,14 @@ pygame.init()
 Music = 'fon_music.mp3'
 fullname = os.path.join('data', Music)
 Music = 'def'
+flag_change_music = True
 pygame.mixer.music.load(fullname)
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.15)
 
 fullname = os.path.join('data', 'steps.mp3')
 steps = pygame.mixer.Sound(fullname)
-steps.set_volume(0.15)
+steps.set_volume(0.25)
 
 size = width, height = 600, 650
 screen = pygame.display.set_mode(size)
