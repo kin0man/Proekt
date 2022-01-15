@@ -31,6 +31,7 @@ tile_width = tile_height = 50
 destinations = []
 boxes = []
 boxes_coords = []
+count_stars = 0
 
 sound = 'sound_on.png'
 
@@ -182,9 +183,30 @@ def terminate():
     sys.exit()
 
 
+def pers_open():
+    fullname = os.path.join('data', 'pers_open.mp3')
+    pers = pygame.mixer.Sound(fullname)
+    pers.set_volume(0.5)
+    pers.play()
+
+
+def pers_close():
+    fullname = os.path.join('data', 'pers_close.mp3')
+    pers = pygame.mixer.Sound(fullname)
+    pers.set_volume(0.5)
+    pers.play()
+
+
+def click():
+    fullname = os.path.join('data', 'click.mp3')
+    click = pygame.mixer.Sound(fullname)
+    click.set_volume(0.1)
+    click.play()
+
 def start_screen():
     global all_sprites, tiles_group, player_group, box_group, player, box_image, \
-        level_x, level_y, level, boxes, boxes_coords, destinations, sound, tile_images, player_image
+        level_x, level_y, level, boxes, boxes_coords, destinations, sound, tile_images, \
+        player_image, Music, flag_change_music, count_stars
     flag_game = False
     flag_endgame = False
     flag_levels = False
@@ -216,9 +238,37 @@ def start_screen():
     screen.blit(load_image(sound), (1, 579))
     rect_sound = pygame.Rect(1, 579, 70, 70)
 
+    with open('data/stars_check.txt') as f:
+        stars_check = [i for i in f.readline()]
+    f.close()
+    count_stars = stars_check.count('1') * 3
+    font = pygame.font.Font(None, 50)
+    text = font.render(f"{count_stars}", True, (255, 255, 100))
+    x = 540
+    if count_stars > 9:
+        x = 520
+    screen.blit(text, (x, 20))
+    screen.blit(load_image('star.png'), (560, 20))
+
     boxes = []
     boxes_coords = []
     destinations = []
+    if sound == 'sound_on.png' and flag_change_music:
+        if Music == 'tin':
+            fullname = os.path.join('data', 'main_tb_music.mp3')
+            pygame.mixer.music.load(fullname)
+            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(0.35)
+        elif Music == 'eve':
+            fullname = os.path.join('data', 'main_ever_sum_music.mp3')
+            pygame.mixer.music.load(fullname)
+            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(0.2)
+        elif Music == 'cyb':
+            fullname = os.path.join('data', 'main_cyberpunk_music.mp3')
+            pygame.mixer.music.load(fullname)
+            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(0.25)
     while True:
         for event in pygame.event.get():
             pressed = pygame.mouse.get_pressed()
@@ -231,21 +281,130 @@ def start_screen():
                 box_group.draw(screen)
                 player_group.draw(screen)
                 if sorted(boxes_coords) == sorted(destinations):
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'win_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(1)
+                        pygame.mixer.music.set_volume(0.15)
                     screen.blit(load_image('end_game.jpg'), (0, 0))
                     screen.blit(load_image('back.png'), (176, 480))
                     screen.blit(load_image('congrats.png'), (6, 60))
                     flag_game = False
                     flag_endgame = True
                     rect_endgame = pygame.Rect(176, 480, 248, 111)
+                    with open('data/stars_check.txt') as f:
+                        stars_check = [i for i in f.readline()]
+                    f.close()
+                    stars_check[flag_name_map - 1] = '1'
+                    with open('data/stars_check.txt', mode='w') as f:
+                        f.write(''.join(stars_check))
+                    f.close()
+
             if pressed[0] and rect_sound.collidepoint(event.pos) and flag_main_menu:
                 if sound == 'sound_on.png':
                     sound = 'sound_off.png'
                     pygame.mixer.music.set_volume(0)
+                    click()
                 else:
                     sound = 'sound_on.png'
-                    pygame.mixer.music.set_volume(0.15)
+                    click()
+                    if Music == 'tin':
+                        pygame.mixer.music.set_volume(0.35)
+                    elif Music == 'eve':
+                        pygame.mixer.music.set_volume(0.2)
+                    elif Music == 'cyb':
+                        pygame.mixer.music.set_volume(0.25)
+                    elif Music == 'def':
+                        pygame.mixer.music.set_volume(0.15)
+                    elif Music == 'lof':
+                        pygame.mixer.music.set_volume(0.1)
+                    elif Music == 'mix':
+                        pygame.mixer.music.set_volume(0.23)
+                    elif Music == 'har':
+                        pygame.mixer.music.set_volume(0.9)
                 start_screen()
                 screen.blit(load_image(sound), (1, 579))
+            if flag_skins:
+                if pressed[0] and rect_TV.collidepoint(event.pos):
+                    player_image = load_image('TV.png')
+                    pers_open()
+                elif pressed[0] and rect_pinguin.collidepoint(event.pos) and count_stars >= 3:
+                    player_image = load_image('pinguin.png')
+                    pers_open()
+                elif pressed[0] and rect_akatsuki.collidepoint(event.pos) and count_stars >= 6:
+                    player_image = load_image('akatsuki.png')
+                    pers_open()
+                elif pressed[0] and rect_ironman.collidepoint(event.pos) and count_stars >= 9:
+                    player_image = load_image('ironman.png')
+                    pers_open()
+                elif pressed[0] and rect_spiderman.collidepoint(event.pos) and count_stars >= 12:
+                    player_image = load_image('spider-man.png')
+                    pers_open()
+                elif pressed[0] and rect_pinguin.collidepoint(event.pos) and count_stars < 3:
+                    pers_close()
+                elif pressed[0] and rect_akatsuki.collidepoint(event.pos) and count_stars < 6:
+                    pers_close()
+                elif pressed[0] and rect_ironman.collidepoint(event.pos) and count_stars < 9:
+                    pers_close()
+                elif pressed[0] and rect_spiderman.collidepoint(event.pos) and count_stars < 12:
+                    pers_close()
+            if flag_music:
+                if pressed[0] and rect_def.collidepoint(event.pos):
+                    Music = 'def'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'fon_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.15)
+                        click()
+                if pressed[0] and rect_tin.collidepoint(event.pos):
+                    Music = 'tin'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'main_tb_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.35)
+                        click()
+                if pressed[0] and rect_eve.collidepoint(event.pos):
+                    Music = 'eve'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'main_ever_sum_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.2)
+                        click()
+                if pressed[0] and rect_cyb.collidepoint(event.pos):
+                    Music = 'cyb'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'main_cyberpunk_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.25)
+                        click()
+                if pressed[0] and rect_lof.collidepoint(event.pos):
+                    Music = 'lof'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'fon_lofi_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.1)
+                        click()
+                if pressed[0] and rect_mix.collidepoint(event.pos):
+                    Music = 'mix'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'fon_mix_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.23)
+                        click()
+                if pressed[0] and rect_har.collidepoint(event.pos):
+                    Music = 'har'
+                    if sound == 'sound_on.png':
+                        fullname = os.path.join('data', 'fon_potter_music.mp3')
+                        pygame.mixer.music.load(fullname)
+                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(0.9)
+                        click()
             if flag_levels:
                 if pressed[0] and rect_level1.collidepoint(event.pos):
                     tile_images = {
@@ -269,30 +428,30 @@ def start_screen():
                     flag_name_map = 2
                 elif pressed[0] and rect_level3.collidepoint(event.pos):
                     tile_images = {
-                        'wall': load_image('stena.png'),
-                        'empty': load_image('pol.png')
+                        'wall': load_image('sand_wall.png'),
+                        'empty': load_image('sand.jpg')
                     }
-                    box_image = load_image('move_box.png')
+                    box_image = load_image('sand_box.jpg')
                     screen.fill((41, 49, 51))
                     screen.blit(load_image('3_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map3.txt'))
                     flag_name_map = 3
                 elif pressed[0] and rect_level4.collidepoint(event.pos):
                     tile_images = {
-                        'wall': load_image('stena.png'),
-                        'empty': load_image('pol.png')
+                        'wall': load_image('sand_wall.png'),
+                        'empty': load_image('sand.jpg')
                     }
-                    box_image = load_image('move_box.png')
+                    box_image = load_image('sand_box.jpg')
                     screen.fill((41, 49, 51))
                     screen.blit(load_image('4_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map4.txt'))
                     flag_name_map = 4
                 elif pressed[0] and rect_level5.collidepoint(event.pos):
                     tile_images = {
-                        'wall': load_image('sand_wall.png'),
-                        'empty': load_image('sand.jpg')
+                        'wall': load_image('ice.png'),
+                        'empty': load_image('snow.jpg')
                     }
-                    box_image = load_image('sand_box.jpg')
+                    box_image = load_image('snow_box.png')
                     screen.fill((41, 49, 51))
                     screen.blit(load_image('5_level.png'), (234, 600))
                     player, level_x, level_y, level = generate_level(load_level('map5.txt'))
@@ -319,9 +478,26 @@ def start_screen():
                     all_sprites.draw(screen)
                     player_group.draw(screen)
                     box_group.draw(screen)
+                    click()
                     flag_game = True
                     flag_levels = False
             if pressed[0] and flag_main_menu and rect.collidepoint(event.pos):
+                if Music == 'tin' and sound == 'sound_on.png':
+                    fullname = os.path.join('data', 'levels_tb_music.mp3')
+                    pygame.mixer.music.load(fullname)
+                    pygame.mixer.music.play(-1)
+                    pygame.mixer.music.set_volume(0.4)
+                elif Music == 'eve' and sound == 'sound_on.png':
+                    fullname = os.path.join('data', 'fon_ever_sum_music.mp3')
+                    pygame.mixer.music.load(fullname)
+                    pygame.mixer.music.play(-1)
+                    pygame.mixer.music.set_volume(0.25)
+                elif Music == 'cyb' and sound == 'sound_on.png':
+                    fullname = os.path.join('data', 'fon_cyberpunk_music.mp3')
+                    pygame.mixer.music.load(fullname)
+                    pygame.mixer.music.play(-1)
+                    pygame.mixer.music.set_volume(0.2)
+
                 screen.blit(fon, (0, 0))
                 screen.blit(load_image('levels.png'), (0, 0))
                 screen.blit(load_image('level_1.png'), (60, 150))
@@ -338,9 +514,24 @@ def start_screen():
                 rect_level4 = pygame.Rect(60, 350, 140, 140)
                 rect_level5 = pygame.Rect(230, 350, 140, 140)
                 rect_level6 = pygame.Rect(400, 350, 140, 140)
+                click()
+                with open('data/stars_check.txt') as f:
+                    stars_check = [i for i in f.readline()]
+                f.close()
+                count_stars = stars_check.count('1') * 3
+                font = pygame.font.Font(None, 50)
+                text = font.render(f"{count_stars}", True, (255, 255, 100))
+                screen.blit(text, (540, 20))
+                screen.blit(load_image('star.png'), (560, 20))
                 flag_levels = True
                 flag_main_menu = False
             if pressed[0] and rect4.collidepoint(event.pos) and flag_main_menu:
+                if Music == 'tin' and sound == 'sound_on.png':
+                    fullname = os.path.join('data', 'info_and_skins_tb_music.mp3')
+                    pygame.mixer.music.load(fullname)
+                    pygame.mixer.music.play(-1)
+                    pygame.mixer.music.set_volume(0.2)
+
                 screen.blit(fon, (0, 0))
                 screen.blit(load_image('rules_1.png'), (0, 0))
                 screen.blit(load_image('rules.png'), (0, 50))
@@ -350,7 +541,14 @@ def start_screen():
                 rect_h1 = pygame.Rect(243, 535, 115, 115)
                 flag_rules = True
                 flag_main_menu = False
+                click()
             if pressed[0] and rect3.collidepoint(event.pos) and flag_main_menu:
+                if Music == 'tin' and sound == 'sound_on.png':
+                    fullname = os.path.join('data', 'info_and_skins_tb_music.mp3')
+                    pygame.mixer.music.load(fullname)
+                    pygame.mixer.music.play(-1)
+                    pygame.mixer.music.set_volume(0.2)
+
                 flag_main_menu = False
                 flag_skins = True
                 screen.blit(fon, (0, 0))
@@ -358,6 +556,14 @@ def start_screen():
                 rect_h1 = pygame.Rect(243, 535, 115, 115)
                 screen.blit(load_image('skins_1.png'), (171, 20))
                 for i in range(5):
+                    if i == 4:
+                        text = font.render(f"{3 * i}+", True, (255, 255, 100))
+                        screen.blit(text, (455, 250))
+                        screen.blit(load_image('star.png'), (510, 250))
+                    else:
+                        text = font.render(f"{3 * i}", True, (255, 255, 100))
+                        screen.blit(text, (65 + 100 * i, 250))
+                        screen.blit(load_image('star.png'), (90 + 100 * i, 250))
                     screen.blit(load_image('ramka.png'), (50 + 100 * i, 275))
                 screen.blit(load_image('TV_100.png'), (56, 280))
                 rect_TV = pygame.Rect(56, 280, 100, 100)
@@ -369,21 +575,50 @@ def start_screen():
                 rect_ironman = pygame.Rect(350, 275, 100, 100)
                 screen.blit(load_image('spider-man_100.png'), (455, 285))
                 rect_spiderman = pygame.Rect(450, 275, 100, 100)
+                click()
+                for i in range(1, 5):
+                    if count_stars == 0:
+                        screen.blit(load_image('destination_100.png'), (56 + 100 * i, 282))
+                    elif count_stars == 3 and i > 1:
+                        screen.blit(load_image('destination_100.png'), (56 + 100 * i, 282))
+                    elif count_stars == 6 and i > 2:
+                        screen.blit(load_image('destination_100.png'), (56 + 100 * i, 282))
+                    elif count_stars == 9 and i > 3:
+                        screen.blit(load_image('destination_100.png'), (56 + 100 * i, 282))
+
             if pressed[0] and rect2.collidepoint(event.pos) and flag_main_menu:
                 flag_main_menu = False
                 flag_music = True
                 screen.blit(fon, (0, 0))
                 screen.blit(load_image('home_2.png'), (243, 535))
                 rect_h1 = pygame.Rect(243, 535, 115, 115)
-                screen.blit(load_image('music_title.png'), (0, 0))
+                screen.blit(load_image('music_title.png'), (0, -20))
+
+                screen.blit(load_image('default.png'), (222, 120))
+                rect_def = pygame.Rect(222, 120, 156, 50)
+                screen.blit(load_image('tiny_bunny.png'), (209, 180))
+                rect_tin = pygame.Rect(209, 180, 183, 50)
+                screen.blit(load_image('lofi.png'), (250, 240))
+                rect_lof = pygame.Rect(250, 240, 101, 50)
+                screen.blit(load_image('mix.png'), (268, 300))
+                rect_mix = pygame.Rect(268, 300, 64, 50)
+                screen.blit(load_image('harry_potter.png'), (225, 360))
+                rect_har = pygame.Rect(225, 360, 150, 50)
+                screen.blit(load_image('everlasting_summer.png'), (205, 420))
+                rect_eve = pygame.Rect(205, 420, 190, 50)
+                screen.blit(load_image('cyberpunk.png'), (161, 480))
+                rect_cyb = pygame.Rect(161, 480, 278, 50)
+                click()
             if flag_game:
                 if pressed[0] and rect_h.collidepoint(event.pos):
+                    click()
                     all_sprites = pygame.sprite.Group()
                     tiles_group = pygame.sprite.Group()
                     player_group = pygame.sprite.Group()
                     box_group = pygame.sprite.Group()
                     start_screen()
                 elif pressed[0] and rect_r.collidepoint(event.pos):
+                    click()
                     all_sprites = pygame.sprite.Group()
                     tiles_group = pygame.sprite.Group()
                     player_group = pygame.sprite.Group()
@@ -396,27 +631,63 @@ def start_screen():
                     all_sprites.draw(screen)
                     box_group.draw(screen)
                     player_group.draw(screen)
-            if flag_skins:
-                if pressed[0] and rect_TV.collidepoint(event.pos):
-                    player_image = load_image('TV.png')
-                elif pressed[0] and rect_pinguin.collidepoint(event.pos):
-                    player_image = load_image('pinguin.png')
-                elif pressed[0] and rect_akatsuki.collidepoint(event.pos):
-                    player_image = load_image('akatsuki.png')
-                elif pressed[0] and rect_ironman.collidepoint(event.pos):
-                    player_image = load_image('ironman.png')
-                elif pressed[0] and rect_spiderman.collidepoint(event.pos):
-                    player_image = load_image('spider-man.png')
-
-            if flag_rules or flag_levels or flag_music or flag_skins:
+            if flag_music or flag_skins or flag_rules or flag_levels:
                 if pressed[0] and rect_h1.collidepoint(event.pos):
+                    click()
                     all_sprites = pygame.sprite.Group()
                     tiles_group = pygame.sprite.Group()
                     player_group = pygame.sprite.Group()
                     box_group = pygame.sprite.Group()
+                    if Music != 'tin':
+                        if flag_music or flag_skins or flag_rules:
+                            flag_change_music = False
+                        else:
+                            flag_change_music = True
+                    else:
+                        if flag_music:
+                            flag_change_music = False
+                        else:
+                            flag_change_music = True
                     start_screen()
             if flag_endgame:
                 if pressed[0] and rect_endgame.collidepoint(event.pos):
+                    if sound == 'sound_on.png':
+                        if Music == 'tin':
+                            fullname = os.path.join('data', 'levels_tb_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.4)
+                        elif Music == 'eve' and sound == 'sound_on.png':
+                            fullname = os.path.join('data', 'fon_ever_sum_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.25)
+                        elif Music == 'lof':
+                            fullname = os.path.join('data', 'fon_lofi_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.1)
+                        elif Music == 'cyb':
+                            fullname = os.path.join('data', 'fon_cyberpunk_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.2)
+                        elif Music == 'har':
+                            fullname = os.path.join('data', 'fon_potter_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.9)
+                        elif Music == 'mix':
+                            fullname = os.path.join('data', 'fon_mix_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.23)
+                        elif Music == 'def':
+                            fullname = os.path.join('data', 'fon_music.mp3')
+                            pygame.mixer.music.load(fullname)
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.15)
+                    click()
                     screen.blit(fon, (0, 0))
                     screen.blit(load_image('levels.png'), (0, 0))
                     screen.blit(load_image('level_1.png'), (60, 150))
@@ -433,6 +704,17 @@ def start_screen():
                     rect_level4 = pygame.Rect(60, 350, 140, 140)
                     rect_level5 = pygame.Rect(230, 350, 140, 140)
                     rect_level6 = pygame.Rect(400, 350, 140, 140)
+                    with open('data/stars_check.txt') as f:
+                        stars_check = [i for i in f.readline()]
+                    f.close()
+                    count_stars = stars_check.count('1') * 3
+                    font = pygame.font.Font(None, 50)
+                    text = font.render(f"{count_stars}", True, (255, 255, 100))
+                    x = 540
+                    if count_stars > 9:
+                        x = 520
+                    screen.blit(text, (x, 20))
+                    screen.blit(load_image('star.png'), (560, 20))
                     flag_levels = True
                     flag_endgame = False
                     all_sprites = pygame.sprite.Group()
@@ -444,13 +726,17 @@ def start_screen():
 
 
 pygame.init()
-fullname = os.path.join('data', 'fon_music.mp3')
+Music = 'fon_music.mp3'
+fullname = os.path.join('data', Music)
+Music = 'def'
+flag_change_music = True
 pygame.mixer.music.load(fullname)
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.15)
 
 fullname = os.path.join('data', 'steps.mp3')
 steps = pygame.mixer.Sound(fullname)
+steps.set_volume(0.25)
 
 size = width, height = 600, 650
 screen = pygame.display.set_mode(size)
