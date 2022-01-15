@@ -1,3 +1,4 @@
+# https://disk.yandex.ru/d/ytG0Nh9t2AyzrQ Ссылка на data
 import sys
 import pygame
 import os
