@@ -10,7 +10,7 @@ player_group = pygame.sprite.Group()
 box_group = pygame.sprite.Group()
 
 
-def load_image(name, colorkey=None):
+def load_image(name, colorkey=None):  # загрузка картинки
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -36,7 +36,7 @@ count_stars = 0
 sound = 'sound_on.png'
 
 
-def load_level(filename):
+def load_level(filename):  # загрузка уровня из файла txt
     filename = "data/" + filename
     with open(filename, 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
@@ -44,7 +44,7 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-class Tile(pygame.sprite.Sprite):
+class Tile(pygame.sprite.Sprite):  # класс плиток
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
         self.image = tile_images[tile_type]
@@ -52,7 +52,7 @@ class Tile(pygame.sprite.Sprite):
             tile_width * pos_x, tile_height * pos_y)
 
 
-class Player(pygame.sprite.Sprite):
+class Player(pygame.sprite.Sprite):  # класс игрока
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.pos_x = pos_x
@@ -61,7 +61,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(
             tile_width * self.pos_x, tile_height * self.pos_y)
 
-    def move(self, event):
+    def move(self, event):  # передвижение игрока
         global all_sprites, tiles_group, player_group, box_group, player, level_x, level_y, level, boxes, boxes_coords
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT and level[self.pos_y][self.pos_x - 1] != '#' and not \
@@ -116,7 +116,7 @@ class Box(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(
             tile_width * self.pos_x, tile_height * self.pos_y)
 
-    def move(self, pos_x, pos_y, direction):
+    def move(self, pos_x, pos_y, direction):  # передвижение коробки
         string = list(level[pos_y])
         if direction == 'left':
             string[pos_x + 1] = '.'
@@ -147,7 +147,7 @@ class Box(pygame.sprite.Sprite):
             tile_width * self.pos_x, tile_height * self.pos_y)
 
 
-class Destination(pygame.sprite.Sprite):
+class Destination(pygame.sprite.Sprite):  # класс места, куда должны доставить коробку
     def __init__(self, pos_x, pos_y):
         super().__init__(all_sprites)
         self.pos_x = pos_x
@@ -158,7 +158,7 @@ class Destination(pygame.sprite.Sprite):
             tile_width * self.pos_x, tile_height * self.pos_y)
 
 
-def generate_level(level):
+def generate_level(level):  # генерация уровня
     new_box, new_player, x, y = None, None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -178,32 +178,33 @@ def generate_level(level):
     return new_player, x, y, level
 
 
-def terminate():
+def terminate():  # закрытие игры
     pygame.quit()
     sys.exit()
 
 
-def pers_open():
+def pers_open():  # воспроизведение звука клика по открытому персонажу
     fullname = os.path.join('data', 'pers_open.mp3')
     pers = pygame.mixer.Sound(fullname)
     pers.set_volume(0.5)
     pers.play()
 
 
-def pers_close():
+def pers_close():  # воспроизведение звука клика по закрытому персонажу
     fullname = os.path.join('data', 'pers_close.mp3')
     pers = pygame.mixer.Sound(fullname)
     pers.set_volume(0.5)
     pers.play()
 
 
-def click():
+def click():  # воспроизведение звука клика по кнопке
     fullname = os.path.join('data', 'click.mp3')
     click = pygame.mixer.Sound(fullname)
     click.set_volume(0.1)
     click.play()
 
-def start_screen():
+
+def start_screen():  # запуск игры
     global all_sprites, tiles_group, player_group, box_group, player, box_image, \
         level_x, level_y, level, boxes, boxes_coords, destinations, sound, tile_images, \
         player_image, Music, flag_change_music, count_stars
@@ -238,7 +239,7 @@ def start_screen():
     screen.blit(load_image(sound), (1, 579))
     rect_sound = pygame.Rect(1, 579, 70, 70)
 
-    with open('data/stars_check.txt') as f:
+    with open('data/stars_check.txt') as f:  # подсчёт звёзд
         stars_check = [i for i in f.readline()]
     f.close()
     count_stars = stars_check.count('1') * 3
@@ -253,7 +254,7 @@ def start_screen():
     boxes = []
     boxes_coords = []
     destinations = []
-    if sound == 'sound_on.png' and flag_change_music:
+    if sound == 'sound_on.png' and flag_change_music:  # включение музыки в меню
         if Music == 'tin':
             fullname = os.path.join('data', 'main_tb_music.mp3')
             pygame.mixer.music.load(fullname)
@@ -274,13 +275,13 @@ def start_screen():
             pressed = pygame.mouse.get_pressed()
             if event.type == pygame.QUIT or pressed[0] and rect5.collidepoint(event.pos) and flag_main_menu:
                 terminate()
-            elif event.type == pygame.KEYDOWN and flag_game:
+            elif event.type == pygame.KEYDOWN and flag_game:  # передвижение
                 steps.play()
                 player.move(event)
                 all_sprites.draw(screen)
                 box_group.draw(screen)
                 player_group.draw(screen)
-                if sorted(boxes_coords) == sorted(destinations):
+                if sorted(boxes_coords) == sorted(destinations):  # окончание игры
                     if sound == 'sound_on.png':
                         fullname = os.path.join('data', 'win_music.mp3')
                         pygame.mixer.music.load(fullname)
@@ -292,16 +293,16 @@ def start_screen():
                     flag_game = False
                     flag_endgame = True
                     rect_endgame = pygame.Rect(176, 480, 248, 111)
-                    with open('data/stars_check.txt') as f:
+                    with open('data/stars_check.txt') as f:  # подсчёт звёзд
                         stars_check = [i for i in f.readline()]
                     f.close()
                     stars_check[flag_name_map - 1] = '1'
-                    with open('data/stars_check.txt', mode='w') as f:
+                    with open('data/stars_check.txt', mode='w') as f:  # изменение количества звёзд
                         f.write(''.join(stars_check))
                     f.close()
 
             if pressed[0] and rect_sound.collidepoint(event.pos) and flag_main_menu:
-                if sound == 'sound_on.png':
+                if sound == 'sound_on.png':  # включение, выключение музыки
                     sound = 'sound_off.png'
                     pygame.mixer.music.set_volume(0)
                     click()
@@ -324,7 +325,7 @@ def start_screen():
                         pygame.mixer.music.set_volume(0.9)
                 start_screen()
                 screen.blit(load_image(sound), (1, 579))
-            if flag_skins:
+            if flag_skins:  # изменение персонажа
                 if pressed[0] and rect_TV.collidepoint(event.pos):
                     player_image = load_image('TV.png')
                     pers_open()
@@ -348,7 +349,7 @@ def start_screen():
                     pers_close()
                 elif pressed[0] and rect_spiderman.collidepoint(event.pos) and count_stars < 12:
                     pers_close()
-            if flag_music:
+            if flag_music:  # изменение музыки
                 if pressed[0] and rect_def.collidepoint(event.pos):
                     Music = 'def'
                     if sound == 'sound_on.png':
@@ -405,7 +406,7 @@ def start_screen():
                         pygame.mixer.music.play(-1)
                         pygame.mixer.music.set_volume(0.9)
                         click()
-            if flag_levels:
+            if flag_levels:  # воспроизведение уровня
                 if pressed[0] and rect_level1.collidepoint(event.pos):
                     tile_images = {
                         'wall': load_image('box.png'),
@@ -481,7 +482,7 @@ def start_screen():
                     click()
                     flag_game = True
                     flag_levels = False
-            if pressed[0] and flag_main_menu and rect.collidepoint(event.pos):
+            if pressed[0] and flag_main_menu and rect.collidepoint(event.pos):  # запуск окна с уровнями
                 if Music == 'tin' and sound == 'sound_on.png':
                     fullname = os.path.join('data', 'levels_tb_music.mp3')
                     pygame.mixer.music.load(fullname)
@@ -515,7 +516,7 @@ def start_screen():
                 rect_level5 = pygame.Rect(230, 350, 140, 140)
                 rect_level6 = pygame.Rect(400, 350, 140, 140)
                 click()
-                with open('data/stars_check.txt') as f:
+                with open('data/stars_check.txt') as f:  # подсчёт звёзд
                     stars_check = [i for i in f.readline()]
                 f.close()
                 count_stars = stars_check.count('1') * 3
@@ -525,7 +526,7 @@ def start_screen():
                 screen.blit(load_image('star.png'), (560, 20))
                 flag_levels = True
                 flag_main_menu = False
-            if pressed[0] and rect4.collidepoint(event.pos) and flag_main_menu:
+            if pressed[0] and rect4.collidepoint(event.pos) and flag_main_menu:  # правила игры
                 if Music == 'tin' and sound == 'sound_on.png':
                     fullname = os.path.join('data', 'info_and_skins_tb_music.mp3')
                     pygame.mixer.music.load(fullname)
@@ -542,7 +543,7 @@ def start_screen():
                 flag_rules = True
                 flag_main_menu = False
                 click()
-            if pressed[0] and rect3.collidepoint(event.pos) and flag_main_menu:
+            if pressed[0] and rect3.collidepoint(event.pos) and flag_main_menu:  # открытие окна со скинами
                 if Music == 'tin' and sound == 'sound_on.png':
                     fullname = os.path.join('data', 'info_and_skins_tb_music.mp3')
                     pygame.mixer.music.load(fullname)
@@ -586,7 +587,7 @@ def start_screen():
                     elif count_stars == 9 and i > 3:
                         screen.blit(load_image('destination_100.png'), (56 + 100 * i, 282))
 
-            if pressed[0] and rect2.collidepoint(event.pos) and flag_main_menu:
+            if pressed[0] and rect2.collidepoint(event.pos) and flag_main_menu:  # открытие окна с музыкой
                 flag_main_menu = False
                 flag_music = True
                 screen.blit(fon, (0, 0))
@@ -610,14 +611,14 @@ def start_screen():
                 rect_cyb = pygame.Rect(161, 480, 278, 50)
                 click()
             if flag_game:
-                if pressed[0] and rect_h.collidepoint(event.pos):
+                if pressed[0] and rect_h.collidepoint(event.pos):  # кнопка домой
                     click()
                     all_sprites = pygame.sprite.Group()
                     tiles_group = pygame.sprite.Group()
                     player_group = pygame.sprite.Group()
                     box_group = pygame.sprite.Group()
                     start_screen()
-                elif pressed[0] and rect_r.collidepoint(event.pos):
+                elif pressed[0] and rect_r.collidepoint(event.pos):  # кнопка перезапуска уровня
                     click()
                     all_sprites = pygame.sprite.Group()
                     tiles_group = pygame.sprite.Group()
@@ -632,7 +633,7 @@ def start_screen():
                     box_group.draw(screen)
                     player_group.draw(screen)
             if flag_music or flag_skins or flag_rules or flag_levels:
-                if pressed[0] and rect_h1.collidepoint(event.pos):
+                if pressed[0] and rect_h1.collidepoint(event.pos):  # большая кнопка домой
                     click()
                     all_sprites = pygame.sprite.Group()
                     tiles_group = pygame.sprite.Group()
@@ -649,7 +650,7 @@ def start_screen():
                         else:
                             flag_change_music = True
                     start_screen()
-            if flag_endgame:
+            if flag_endgame:  # открытие окна с уровнями после прохождения уровня
                 if pressed[0] and rect_endgame.collidepoint(event.pos):
                     if sound == 'sound_on.png':
                         if Music == 'tin':
