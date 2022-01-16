@@ -557,6 +557,17 @@ def start_screen():  # запуск игры
                 screen.blit(load_image('home_2.png'), (243, 535))
                 rect_h1 = pygame.Rect(243, 535, 115, 115)
                 screen.blit(load_image('skins_1.png'), (171, 20))
+                with open('data/stars_check.txt') as f:  # подсчёт и отображение звёзд
+                    stars_check = [i for i in f.readline()]
+                f.close()
+                count_stars = stars_check.count('1') * 3
+                font = pygame.font.Font(None, 50)
+                text = font.render(f"{count_stars}", True, (255, 255, 100))
+                x = 540
+                if count_stars > 9:
+                    x = 520
+                screen.blit(text, (x, 20))
+                screen.blit(load_image('star.png'), (560, 20))
                 for i in range(5):
                     if i == 4:
                         text = font.render(f"{3 * i}+", True, (255, 255, 100))
