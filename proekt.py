@@ -2,6 +2,7 @@
 import sys
 import pygame
 import os
+import random
 
 FPS = 50
 player = None
@@ -9,6 +10,7 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 box_group = pygame.sprite.Group()
+stars_group = pygame.sprite.Group()
 
 
 def load_image(name, colorkey=None):  # загрузка картинки
@@ -159,6 +161,40 @@ class Destination(pygame.sprite.Sprite):  # класс места, куда до
             tile_width * self.pos_x, tile_height * self.pos_y)
 
 
+screen_rect = (0, 0, 600, 650)
+
+
+class Particle(pygame.sprite.Sprite):
+    # сгенерируем частицы разного размера
+    fire = [load_image("stars.png")]
+    for scale in (5, 10, 20):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(stars_group)
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+
+        # у каждой частицы своя скорость — это вектор
+        self.velocity = [dx, dy]
+        # и свои координаты
+        self.rect.x, self.rect.y = pos
+
+        # гравитация будет одинаковой (значение константы)
+        self.gravity = 0.8
+
+    def update(self):
+        # применяем гравитационный эффект:
+        # движение с ускорением под действием гравитации
+        self.velocity[1] += self.gravity
+        # перемещаем частицу
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        # убиваем, если частица ушла за экран
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
+
+
 def generate_level(level):  # генерация уровня
     new_box, new_player, x, y = None, None, None, None
     for y in range(len(level)):
@@ -203,6 +239,15 @@ def click():  # воспроизведение звука клика по кно
     click = pygame.mixer.Sound(fullname)
     click.set_volume(0.1)
     click.play()
+
+
+def create_particles(position):
+    # количество создаваемых частиц
+    particle_count = 20
+    # возможные скорости
+    numbers = range(-5, 6)
+    for _ in range(particle_count):
+        Particle(position, random.choice(numbers), random.choice(numbers))
 
 
 def start_screen():  # запуск игры
@@ -293,7 +338,18 @@ def start_screen():  # запуск игры
                     screen.blit(load_image('congrats.png'), (6, 60))
                     flag_game = False
                     flag_endgame = True
+                    running = 110
+                    while running > 0:
+                        running -= 1
+                        create_particles((random.randint(0, 600), 10))
+                        stars_group.update()
+                        stars_group.draw(screen)
+                        pygame.display.flip()
+                        clock.tick(50)
                     rect_endgame = pygame.Rect(176, 480, 248, 111)
+                    screen.blit(load_image('end_game.jpg'), (0, 0))
+                    screen.blit(load_image('back.png'), (176, 480))
+                    screen.blit(load_image('congrats.png'), (6, 60))
                     with open('data/stars_check.txt') as f:  # подсчёт звёзд
                         stars_check = [i for i in f.readline()]
                     f.close()
@@ -523,7 +579,10 @@ def start_screen():  # запуск игры
                 count_stars = stars_check.count('1') * 3
                 font = pygame.font.Font(None, 50)
                 text = font.render(f"{count_stars}", True, (255, 255, 100))
-                screen.blit(text, (540, 20))
+                x = 540
+                if count_stars > 9:
+                    x = 520
+                screen.blit(text, (x, 20))
                 screen.blit(load_image('star.png'), (560, 20))
                 flag_levels = True
                 flag_main_menu = False
@@ -734,6 +793,7 @@ def start_screen():  # запуск игры
                     tiles_group = pygame.sprite.Group()
                     player_group = pygame.sprite.Group()
                     box_group = pygame.sprite.Group()
+            all_sprites.update()
         pygame.display.flip()
         clock.tick(FPS)
 
